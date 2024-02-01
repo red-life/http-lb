@@ -1,6 +1,9 @@
 package algorithms
 
-import "sync"
+import (
+	"net/http"
+	"sync"
+)
 
 func NewRoundRobin(backendAddrs []string) *RoundRobin {
 	return &RoundRobin{backendAddrs: backendAddrs}
@@ -12,7 +15,7 @@ type RoundRobin struct {
 	backendAddrs []string
 }
 
-func (r *RoundRobin) ChooseBackend() string {
+func (r *RoundRobin) ChooseBackend(_ http.Request) string {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	defer func() { r.counter++ }()
