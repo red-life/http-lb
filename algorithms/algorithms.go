@@ -1,7 +1,9 @@
 package algorithms
 
-import "net/http"
+import (
+	"github.com/red-life/http-lb"
+)
 
 type LoadBalancingAlgorithm interface {
-	ChooseBackend(r http.Request) string
+	ChooseBackend(r http_lb.Request) string
 }

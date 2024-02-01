@@ -1,6 +1,7 @@
 package algorithms_test
 
 import (
+	"github.com/red-life/http-lb"
 	"github.com/red-life/http-lb/algorithms"
 	"testing"
 )
@@ -17,7 +18,7 @@ func TestRoundRobin_ChooseBackend(t *testing.T) {
 	rr := algorithms.NewRoundRobin(backendAddrs)
 	for i := 0; i < 100; i++ {
 		expected := backendAddrs[i%len(backendAddrs)]
-		chosenBackend := rr.ChooseBackend()
+		chosenBackend := rr.ChooseBackend(http_lb.Request{})
 		if expected != chosenBackend {
 			t.Errorf("Failed on %d: Expected '%s' but got '%s'", i, expected, chosenBackend)
 		}

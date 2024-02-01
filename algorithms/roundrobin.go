@@ -1,7 +1,7 @@
 package algorithms
 
 import (
-	"net/http"
+	"github.com/red-life/http-lb"
 	"sync"
 )
 
@@ -15,7 +15,7 @@ type RoundRobin struct {
 	backendAddrs []string
 }
 
-func (r *RoundRobin) ChooseBackend(_ http.Request) string {
+func (r *RoundRobin) ChooseBackend(_ http_lb.Request) string {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	defer func() { r.counter++ }()
