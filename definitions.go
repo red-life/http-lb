@@ -11,6 +11,10 @@ type LoadBalancingAlgorithm interface {
 	ChooseBackend(r Request) string
 }
 
+type ReverseProxy interface {
+	ServeHTTP(backendAddr string, rw http.ResponseWriter, r *http.Request)
+}
+
 func RewriteHeaders(headers map[string]string) func(*httputil.ProxyRequest) {
 	return func(p *httputil.ProxyRequest) {
 		for key, value := range headers {
