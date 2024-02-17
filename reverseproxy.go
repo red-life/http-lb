@@ -21,10 +21,11 @@ func NewReverseProxy(backends []Backend) *CustomReverseProxy {
 	reverseProxy := &CustomReverseProxy{}
 	for _, b := range backends {
 		parsedURL, _ := url.Parse(b.Addr)
+		rewriteURL := RewriteURL(parsedURL)
 		rp := &httputil.ReverseProxy{}
 		rp.Rewrite = func(request *httputil.ProxyRequest) {
 			RewriteXForwarded(request)
-			RewriteURL(parsedURL)
+			rewriteURL(request)
 		}
 		reverseProxy.cache[b.Addr] = rp
 	}
