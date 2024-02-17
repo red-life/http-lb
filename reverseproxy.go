@@ -8,8 +8,6 @@ import (
 
 func RewriteXForwarded(p *httputil.ProxyRequest) {
 	p.Out.Header.Del("X-Forwarded-For")
-	p.Out.Header.Del("X-Forwarded-Host")
-	p.Out.Header.Del("X-Forwarded-Proto")
 	p.SetXForwarded()
 }
 
