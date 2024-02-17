@@ -6,6 +6,8 @@ import (
 	"net/url"
 )
 
+var _ ReverseProxy = (*CustomReverseProxy)(nil)
+
 func RewriteXForwarded(p *httputil.ProxyRequest) {
 	p.Out.Header.Del("X-Forwarded-For")
 	p.SetXForwarded()

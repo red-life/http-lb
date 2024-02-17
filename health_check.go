@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var _ HealthChecker = (*HealthCheck)(nil)
+
 func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Duration, addrsMng AddrsManager, expectedStatusCode int) *HealthCheck {
 	return &HealthCheck{
 		endPoint:           endPoint,

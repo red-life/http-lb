@@ -4,6 +4,8 @@ import (
 	"net/http"
 )
 
+var _ RequestForwarder = (*Forwarder)(nil)
+
 type Forwarder struct {
 	lbAlgo       LoadBalancingAlgorithm
 	reverseProxy ReverseProxy
