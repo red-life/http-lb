@@ -6,14 +6,6 @@ import (
 	"net/url"
 )
 
-func RewriteHeaders(headers map[string]string) func(*httputil.ProxyRequest) {
-	return func(p *httputil.ProxyRequest) {
-		for key, value := range headers {
-			p.Out.Header.Set(key, value)
-		}
-	}
-}
-
 func RewriteXForwarded(p *httputil.ProxyRequest) {
 	p.Out.Header.Del("X-Forwarded-For")
 	p.Out.Header.Del("X-Forwarded-Host")
@@ -33,7 +25,6 @@ func NewReverseProxy(backends []Backend) *CustomReverseProxy {
 		parsedURL, _ := url.Parse(b.Addr)
 		rp := &httputil.ReverseProxy{}
 		rp.Rewrite = func(request *httputil.ProxyRequest) {
-			RewriteHeaders(b.Headers)(request)
 			RewriteXForwarded(request)
 			RewriteURL(parsedURL)
 		}

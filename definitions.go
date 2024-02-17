@@ -43,5 +43,4 @@ type TransportOptions struct {
 type Backend struct {
 	Addr      string
 	Transport *http.Transport
-	Headers   map[string]string
 }
