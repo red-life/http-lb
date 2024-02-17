@@ -25,6 +25,10 @@ type RequestForwarder interface {
 	Forward(http.ResponseWriter, *http.Request)
 }
 
+type HealthChecker interface {
+	Run()
+}
+
 type Request struct {
 	RemoteIP string
 	URLPath  string

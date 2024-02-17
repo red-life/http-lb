@@ -4,6 +4,7 @@ import (
 	"hash/fnv"
 	"net"
 	"net/http"
+	"time"
 )
 
 func Hash(input string) uint {
@@ -32,4 +33,25 @@ func CopySlice[T any](slice []T) []T {
 	copySlice := make([]T, len(slice))
 	copy(copySlice, slice)
 	return copySlice
+}
+
+func DifferenceSlices[T comparable](a, b []T) []T {
+	mb := make(map[T]struct{}, len(b))
+	for _, x := range b {
+		mb[x] = struct{}{}
+	}
+	var diff []T
+	for _, x := range a {
+		if _, found := mb[x]; !found {
+			diff = append(diff, x)
+		}
+	}
+	return diff
+}
+
+func HttpGet(url string, timeout time.Duration) (*http.Response, error) {
+	client := &http.Client{
+		Timeout: timeout,
+	}
+	return client.Get(url)
 }
