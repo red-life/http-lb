@@ -27,3 +27,9 @@ func CreateTransport(options TransportOptions) *http.Transport {
 	tr.DialContext = dialer.DialContext
 	return tr
 }
+
+func CopySlice[T any](slice []T) []T {
+	copySlice := make([]T, len(slice))
+	copy(copySlice, slice)
+	return copySlice
+}

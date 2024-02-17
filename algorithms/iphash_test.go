@@ -15,7 +15,7 @@ func TestIPHash_ChooseBackend(t *testing.T) {
 		"addr 5",
 		"addr 6",
 	}
-	ipHash := algorithms.NewIPHash(backendAddrs, http_lb.Hash)
+	ipHash := algorithms.NewIPHash(http_lb.Hash, algorithms.NewBackendAddrsManager(backendAddrs))
 	tests := []struct {
 		input    http_lb.Request
 		expected string

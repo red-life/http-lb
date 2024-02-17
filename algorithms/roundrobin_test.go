@@ -15,7 +15,7 @@ func TestRoundRobin_ChooseBackend(t *testing.T) {
 		"addr 5",
 		"addr 6",
 	}
-	rr := algorithms.NewRoundRobin(backendAddrs)
+	rr := algorithms.NewRoundRobin(algorithms.NewBackendAddrsManager(backendAddrs))
 	for i := 0; i < 100; i++ {
 		expected := backendAddrs[i%len(backendAddrs)]
 		chosenBackend := rr.ChooseBackend(http_lb.Request{})

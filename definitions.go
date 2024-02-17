@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+type HashingAlgorithm func(string) uint
+
+type AddrsManager interface {
+	RegisterBackend(string) error
+	UnregisterBackend(string) error
+	GetBackends() []string
+}
+
 type LoadBalancingAlgorithm interface {
 	ChooseBackend(Request) string
 }

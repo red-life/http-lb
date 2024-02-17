@@ -15,7 +15,7 @@ func TestURLHash_ChooseBackend(t *testing.T) {
 		"addr 5",
 		"addr 6",
 	}
-	urlHash := algorithms.NewURLHash(backendAddrs, http_lb.Hash)
+	urlHash := algorithms.NewURLHash(http_lb.Hash, algorithms.NewBackendAddrsManager(backendAddrs))
 	tests := []struct {
 		input    http_lb.Request
 		expected string

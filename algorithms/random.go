@@ -6,15 +6,20 @@ import (
 	"math/big"
 )
 
-func NewRandom(backendAddrs []string) *Random {
-	return &Random{backendAddrs: backendAddrs}
+var _ http_lb.LoadBalancingAlgorithm = (*Random)(nil)
+
+func NewRandom(addrMng http_lb.AddrsManager) *Random {
+	return &Random{
+		addrMng: addrMng,
+	}
 }
 
 type Random struct {
-	backendAddrs []string
+	addrMng http_lb.AddrsManager
 }
 
 func (r *Random) ChooseBackend(_ http_lb.Request) string {
-	randomNumber, _ := rand.Int(rand.Reader, big.NewInt(int64(len(r.backendAddrs))))
-	return r.backendAddrs[int(randomNumber.Int64())]
+	addrs := r.addrMng.GetBackends()
+	randomNumber, _ := rand.Int(rand.Reader, big.NewInt(int64(len(addrs))))
+	return addrs[int(randomNumber.Int64())]
 }

@@ -5,22 +5,27 @@ import (
 	"sync"
 )
 
-func NewRoundRobin(backendAddrs []string) *RoundRobin {
-	return &RoundRobin{backendAddrs: backendAddrs}
+var _ http_lb.LoadBalancingAlgorithm = (*RoundRobin)(nil)
+
+func NewRoundRobin(addrMng http_lb.AddrsManager) *RoundRobin {
+	return &RoundRobin{
+		addrMng: addrMng,
+	}
 }
 
 type RoundRobin struct {
-	mutex        sync.Mutex
-	counter      int
-	backendAddrs []string
+	counter int
+	addrMng http_lb.AddrsManager
+	lock    sync.Mutex
 }
 
 func (r *RoundRobin) ChooseBackend(_ http_lb.Request) string {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 	defer func() { r.counter++ }()
-	if r.counter > len(r.backendAddrs)-1 {
+	addrs := r.addrMng.GetBackends()
+	if r.counter > len(addrs)-1 {
 		r.counter = 0
 	}
-	return r.backendAddrs[r.counter]
+	return addrs[r.counter]
 }

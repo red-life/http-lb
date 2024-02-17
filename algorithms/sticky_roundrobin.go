@@ -7,34 +7,37 @@ import (
 	"time"
 )
 
+var _ http_lb.LoadBalancingAlgorithm = (*StickyRoundRobin)(nil)
+
 const DefaultExpiration = 30 * time.Minute
 const DefaultCleanupInterval = 15 * time.Minute
 
-func NewStickyRoundRobin(backendAddrs []string) *StickyRoundRobin {
+func NewStickyRoundRobin(addrMng http_lb.AddrsManager) *StickyRoundRobin {
 	return &StickyRoundRobin{
-		backendAddrs: backendAddrs,
-		cache:        cache.New(DefaultExpiration, DefaultCleanupInterval),
+		cache:   cache.New(DefaultExpiration, DefaultCleanupInterval),
+		addrMng: addrMng,
 	}
 }
 
 type StickyRoundRobin struct {
-	mutex        sync.Mutex
-	counter      int
-	backendAddrs []string
-	cache        *cache.Cache
+	counter int
+	cache   *cache.Cache
+	addrMng http_lb.AddrsManager
+	lock    sync.Mutex
 }
 
 func (s *StickyRoundRobin) ChooseBackend(r http_lb.Request) string {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	requestIP := r.RemoteIP
-	if backend, ok := s.cache.Get(requestIP); ok {
+	if backend, ok := s.cache.Get(requestIP); ok { // the backend might be unregistered but still available in cache
 		return backend.(string)
 	}
-	if s.counter > len(s.backendAddrs)-1 {
+	addrs := s.addrMng.GetBackends()
+	if s.counter > len(addrs)-1 {
 		s.counter = 0
 	}
-	chosenBackend := s.backendAddrs[s.counter]
+	chosenBackend := addrs[s.counter]
 	s.cache.SetDefault(requestIP, chosenBackend)
 	s.counter++
 	return chosenBackend

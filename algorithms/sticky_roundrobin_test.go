@@ -30,7 +30,7 @@ func TestStickyRoundRobin_ChooseBackend(t *testing.T) {
 		{http_lb.Request{RemoteIP: "4.4.4.4"}, backendAddrs[3]},
 		{http_lb.Request{RemoteIP: "6.6.6.6"}, backendAddrs[5]},
 	}
-	sticky_rr := algorithms.NewStickyRoundRobin(backendAddrs)
+	sticky_rr := algorithms.NewStickyRoundRobin(algorithms.NewBackendAddrsManager(backendAddrs))
 	for i, test := range tests {
 		chosenBackend := sticky_rr.ChooseBackend(test.input)
 		if chosenBackend != test.expected {

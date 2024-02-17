@@ -2,18 +2,21 @@ package algorithms
 
 import "github.com/red-life/http-lb"
 
-func NewURLHash(backendAddrs []string, hash func(string) uint) *URLHash {
+var _ http_lb.LoadBalancingAlgorithm = (*URLHash)(nil)
+
+func NewURLHash(hash http_lb.HashingAlgorithm, addrMng http_lb.AddrsManager) *URLHash {
 	return &URLHash{
-		backendAddrs: backendAddrs,
-		hash:         hash,
+		hash:    hash,
+		addrMng: addrMng,
 	}
 }
 
 type URLHash struct {
-	hash         func(string) uint
-	backendAddrs []string
+	hash    http_lb.HashingAlgorithm
+	addrMng http_lb.AddrsManager
 }
 
 func (u *URLHash) ChooseBackend(r http_lb.Request) string {
-	return u.backendAddrs[int(u.hash(r.URLPath))%len(u.backendAddrs)]
+	addrs := u.addrMng.GetBackends()
+	return addrs[int(u.hash(r.URLPath))%len(addrs)]
 }

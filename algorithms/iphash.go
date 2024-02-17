@@ -1,19 +1,24 @@
 package algorithms
 
-import "github.com/red-life/http-lb"
+import (
+	"github.com/red-life/http-lb"
+)
 
-func NewIPHash(backendAddrs []string, hash func(string) uint) *IPHash {
+var _ http_lb.LoadBalancingAlgorithm = (*IPHash)(nil)
+
+func NewIPHash(hash http_lb.HashingAlgorithm, addrMng http_lb.AddrsManager) *IPHash {
 	return &IPHash{
-		backendAddrs: backendAddrs,
-		hash:         hash,
+		hash:    hash,
+		addrMng: addrMng,
 	}
 }
 
 type IPHash struct {
-	hash         func(string) uint
-	backendAddrs []string
+	hash    http_lb.HashingAlgorithm
+	addrMng http_lb.AddrsManager
 }
 
 func (i *IPHash) ChooseBackend(r http_lb.Request) string {
-	return i.backendAddrs[int(i.hash(r.RemoteIP))%len(i.backendAddrs)]
+	addrs := i.addrMng.GetBackends()
+	return addrs[int(i.hash(r.RemoteIP))%len(addrs)]
 }
