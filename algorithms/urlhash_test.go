@@ -3,6 +3,7 @@ package algorithms_test
 import (
 	"github.com/red-life/http-lb"
 	"github.com/red-life/http-lb/algorithms"
+	"go.uber.org/zap"
 	"testing"
 )
 
@@ -15,15 +16,17 @@ func TestURLHash_ChooseBackend(t *testing.T) {
 		"addr 5",
 		"addr 6",
 	}
-	urlHash := algorithms.NewURLHash(http_lb.Hash, algorithms.NewBackendAddrsManager(backendAddrs))
+	logger, _ := zap.NewDevelopment()
+	addrMng := algorithms.NewBackendAddrsManager(backendAddrs, logger)
+	urlHash := algorithms.NewURLHash(http_lb.Hash, addrMng, logger)
 	tests := []struct {
 		input    http_lb.Request
 		expected string
 	}{
-		{input: http_lb.Request{URLPath: "/"}, expected: backendAddrs[int(http_lb.Hash("/"))%len(backendAddrs)]},
-		{input: http_lb.Request{URLPath: "/home"}, expected: backendAddrs[int(http_lb.Hash("/home"))%len(backendAddrs)]},
-		{input: http_lb.Request{URLPath: "/auth/login"}, expected: backendAddrs[int(http_lb.Hash("/auth/login"))%len(backendAddrs)]},
-		{input: http_lb.Request{URLPath: "/api/v1"}, expected: backendAddrs[int(http_lb.Hash("/api/v1"))%len(backendAddrs)]},
+		{http_lb.Request{URLPath: "/"}, backendAddrs[int(http_lb.Hash("/"))%len(backendAddrs)]},
+		{http_lb.Request{URLPath: "/home"}, backendAddrs[int(http_lb.Hash("/home"))%len(backendAddrs)]},
+		{http_lb.Request{URLPath: "/auth/login"}, backendAddrs[int(http_lb.Hash("/auth/login"))%len(backendAddrs)]},
+		{http_lb.Request{URLPath: "/api/v1"}, backendAddrs[int(http_lb.Hash("/api/v1"))%len(backendAddrs)]},
 	}
 	for i, test := range tests {
 		chosenBackend, err := urlHash.ChooseBackend(test.input)

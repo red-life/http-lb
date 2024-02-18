@@ -3,6 +3,7 @@ package algorithms_test
 import (
 	"github.com/red-life/http-lb"
 	"github.com/red-life/http-lb/algorithms"
+	"go.uber.org/zap"
 	"testing"
 )
 
@@ -15,7 +16,9 @@ func TestRoundRobin_ChooseBackend(t *testing.T) {
 		"addr 5",
 		"addr 6",
 	}
-	rr := algorithms.NewRoundRobin(algorithms.NewBackendAddrsManager(backendAddrs))
+	logger, _ := zap.NewDevelopment()
+	addrMng := algorithms.NewBackendAddrsManager(backendAddrs, logger)
+	rr := algorithms.NewRoundRobin(addrMng, logger)
 	for i := 0; i < 100; i++ {
 		expected := backendAddrs[i%len(backendAddrs)]
 		chosenBackend, err := rr.ChooseBackend(http_lb.Request{})

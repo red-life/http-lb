@@ -3,6 +3,7 @@ package algorithms_test
 import (
 	"github.com/red-life/http-lb"
 	"github.com/red-life/http-lb/algorithms"
+	"go.uber.org/zap"
 	"testing"
 )
 
@@ -39,7 +40,8 @@ func TestBackendAddrsManager_RegisterBackend(t *testing.T) {
 		{addrs[1], http_lb.ErrBackendExists},
 		{addrs[2], http_lb.ErrBackendExists},
 	}
-	addrMng := algorithms.NewBackendAddrsManager([]string{})
+	logger, _ := zap.NewDevelopment()
+	addrMng := algorithms.NewBackendAddrsManager([]string{}, logger)
 	for _, test := range tests {
 		err := addrMng.RegisterBackend(test.input)
 		if err != test.expected {
@@ -66,7 +68,8 @@ func TestBackendAddrsManager_UnregisterBackend(t *testing.T) {
 		{addrs[1], http_lb.ErrBackendNotExist},
 		{addrs[2], http_lb.ErrBackendNotExist},
 	}
-	addrMng := algorithms.NewBackendAddrsManager(addrs)
+	logger, _ := zap.NewDevelopment()
+	addrMng := algorithms.NewBackendAddrsManager(addrs, logger)
 	for _, test := range tests {
 		err := addrMng.UnregisterBackend(test.input)
 		if err != test.expected {

@@ -3,6 +3,7 @@ package algorithms_test
 import (
 	"github.com/red-life/http-lb"
 	"github.com/red-life/http-lb/algorithms"
+	"go.uber.org/zap"
 	"testing"
 )
 
@@ -30,7 +31,9 @@ func TestStickyRoundRobin_ChooseBackend(t *testing.T) {
 		{http_lb.Request{RemoteIP: "4.4.4.4"}, backendAddrs[3]},
 		{http_lb.Request{RemoteIP: "6.6.6.6"}, backendAddrs[5]},
 	}
-	sticky_rr := algorithms.NewStickyRoundRobin(algorithms.NewBackendAddrsManager(backendAddrs))
+	logger, _ := zap.NewDevelopment()
+	addrMng := algorithms.NewBackendAddrsManager(backendAddrs, logger)
+	sticky_rr := algorithms.NewStickyRoundRobin(addrMng, logger)
 	for i, test := range tests {
 		chosenBackend, err := sticky_rr.ChooseBackend(test.input)
 		if err != nil {
