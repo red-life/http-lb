@@ -1,9 +1,12 @@
 package http_lb
 
 import (
+	"context"
 	"go.uber.org/zap"
 	"net/http"
 )
+
+var _ GracefulShutdown = (*Frontend)(nil)
 
 func NewFrontend(listenAddr string, tls *TLSOptions, logger *zap.Logger) *Frontend {
 	return &Frontend{
@@ -25,6 +28,7 @@ type Frontend struct {
 	tls          *TLSOptions
 	reqForwarder RequestForwarder
 	logger       *zap.Logger
+	httpServer   http.Server
 }
 
 func (f *Frontend) Handler(rw http.ResponseWriter, r *http.Request) {
@@ -43,11 +47,17 @@ func (f *Frontend) Handler(rw http.ResponseWriter, r *http.Request) {
 
 func (f *Frontend) Run() error {
 	f.mux.HandleFunc("/", f.Handler)
+	f.httpServer.Handler = f.mux
+	f.httpServer.Addr = f.listenAddr
 	if f.tls != nil {
 		f.logger.Info("started listening tls", zap.String("listen", f.listenAddr),
 			zap.String("certFile", f.tls.CertFile), zap.String("keyFile", f.tls.KeyFile))
-		return http.ListenAndServeTLS(f.listenAddr, f.tls.CertFile, f.tls.KeyFile, f.mux)
+		return f.httpServer.ListenAndServeTLS(f.tls.CertFile, f.tls.KeyFile)
 	}
 	f.logger.Info("started listening", zap.String("listen", f.listenAddr))
-	return http.ListenAndServe(f.listenAddr, f.mux)
+	return f.httpServer.ListenAndServe()
+}
+
+func (f *Frontend) Shutdown() error {
+	return f.httpServer.Shutdown(context.Background())
 }

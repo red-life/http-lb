@@ -8,6 +8,7 @@ import (
 )
 
 var _ HealthChecker = (*HealthCheck)(nil)
+var _ GracefulShutdown = (*HealthCheck)(nil)
 
 func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Duration, addrsMng AddrsManager,
 	expectedStatusCode int, logger *zap.Logger) *HealthCheck {
@@ -29,20 +30,35 @@ type HealthCheck struct {
 	expectedStatusCode  int
 	unavailableBackends []string
 	logger              *zap.Logger
+	shutdownCh          chan struct{}
 }
 
 func (h *HealthCheck) Run() {
 	go func() {
 		for {
-			foundUnavailableBackends := h.findUnavailableBackends()
-			unavailableBackends := DifferenceSlices(foundUnavailableBackends, h.unavailableBackends)
-			availableBackends := DifferenceSlices(h.unavailableBackends, foundUnavailableBackends)
-			h.unavailableBackends = unavailableBackends
-			_ = h.register(availableBackends)
-			_ = h.unregister(unavailableBackends)
+			select {
+			case <-h.shutdownCh:
+				return
+			default:
+				h.run()
+			}
 			time.Sleep(h.interval)
 		}
 	}()
+}
+
+func (h *HealthCheck) Shutdown() error {
+	h.shutdownCh <- struct{}{}
+	return nil
+}
+
+func (h *HealthCheck) run() {
+	foundUnavailableBackends := h.findUnavailableBackends()
+	unavailableBackends := DifferenceSlices(foundUnavailableBackends, h.unavailableBackends)
+	availableBackends := DifferenceSlices(h.unavailableBackends, foundUnavailableBackends)
+	h.unavailableBackends = unavailableBackends
+	_ = h.register(availableBackends)
+	_ = h.unregister(unavailableBackends)
 }
 
 func (h *HealthCheck) findUnavailableBackends() []string {
