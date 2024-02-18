@@ -29,6 +29,10 @@ type HealthChecker interface {
 	Run()
 }
 
+type GracefulShutdown interface {
+	Shutdown() error
+}
+
 type Request struct {
 	RemoteIP string
 	URLPath  string
