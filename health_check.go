@@ -3,18 +3,21 @@ package http_lb
 import (
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"time"
 )
 
 var _ HealthChecker = (*HealthCheck)(nil)
 
-func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Duration, addrsMng AddrsManager, expectedStatusCode int) *HealthCheck {
+func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Duration, addrsMng AddrsManager,
+	expectedStatusCode int, logger *zap.Logger) *HealthCheck {
 	return &HealthCheck{
 		endPoint:           endPoint,
 		interval:           interval,
 		timeout:            timeout,
 		addrsMng:           addrsMng,
 		expectedStatusCode: expectedStatusCode,
+		logger:             logger,
 	}
 }
 
@@ -25,6 +28,7 @@ type HealthCheck struct {
 	addrsMng            AddrsManager
 	expectedStatusCode  int
 	unavailableBackends []string
+	logger              *zap.Logger
 }
 
 func (h *HealthCheck) Run() {
@@ -46,8 +50,12 @@ func (h *HealthCheck) findUnavailableBackends() []string {
 	for _, addr := range h.addrsMng.GetBackends() {
 		resp, err := HttpGet(fmt.Sprintf("%s/%s", addr, h.endPoint), h.timeout)
 		if err != nil || resp.StatusCode != h.expectedStatusCode {
+			h.logger.Warn("backend went down",
+				zap.String("addr", addr), zap.Error(err), zap.Int("statusCode", resp.StatusCode))
 			unavailableBackends = append(unavailableBackends, addr)
+			continue
 		}
+		h.logger.Info("backend is up", zap.String("addr", addr))
 	}
 	return unavailableBackends
 }
