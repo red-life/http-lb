@@ -27,15 +27,19 @@ type StickyRoundRobin struct {
 }
 
 func (s *StickyRoundRobin) ChooseBackend(r http_lb.Request) (string, error) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	requestIP := r.RemoteIP
-	if backend, ok := s.cache.Get(requestIP); ok { // the backend might be unregistered but still available in cache
-		return backend.(string), nil
-	}
 	addrs := s.addrMng.GetBackends()
 	if len(addrs) <= 0 {
 		return "", http_lb.ErrNoServerAvailable
+	}
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	requestIP := r.RemoteIP
+	if backend, ok := s.cache.Get(requestIP); ok {
+		if http_lb.ContainsSlice(addrs, backend.(string)) {
+			return backend.(string), nil
+		} else {
+			s.cache.Delete(requestIP)
+		}
 	}
 	if s.counter > len(addrs)-1 {
 		s.counter = 0
