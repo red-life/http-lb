@@ -34,10 +34,10 @@ func TestStickyRoundRobin_ChooseBackend(t *testing.T) {
 	for i, test := range tests {
 		chosenBackend, err := sticky_rr.ChooseBackend(test.input)
 		if err != nil {
-			t.Fatalf("Expected err to be nil but got %s", err)
+			t.Fatalf("Expected err to be nil but got %s\n", err)
 		}
 		if chosenBackend != test.expected {
-			t.Errorf("Failed on %d with IP %s: Expected '%s' but got '%s'", i, test.input.RemoteIP,
+			t.Errorf("Failed on %d with IP %s: Expected '%s' but got '%s'\n", i, test.input.RemoteIP,
 				test.expected, chosenBackend)
 		}
 	}

@@ -20,10 +20,10 @@ func TestRoundRobin_ChooseBackend(t *testing.T) {
 		expected := backendAddrs[i%len(backendAddrs)]
 		chosenBackend, err := rr.ChooseBackend(http_lb.Request{})
 		if err != nil {
-			t.Fatalf("Expected err to be nil but got %s", err)
+			t.Fatalf("Expected err to be nil but got %s\n", err)
 		}
 		if expected != chosenBackend {
-			t.Errorf("Failed on %d: Expected '%s' but got '%s'", i, expected, chosenBackend)
+			t.Errorf("Failed on %d: Expected '%s' but got '%s'\n", i, expected, chosenBackend)
 		}
 	}
 }

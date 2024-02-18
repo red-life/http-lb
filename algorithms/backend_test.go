@@ -70,10 +70,10 @@ func TestBackendAddrsManager_UnregisterBackend(t *testing.T) {
 	for _, test := range tests {
 		err := addrMng.UnregisterBackend(test.input)
 		if err != test.expected {
-			t.Fatalf("Expected err to be %s but got %s", test.expected, err)
+			t.Fatalf("Expected err to be %s but got %s\n", test.expected, err)
 		}
 	}
 	if len(addrMng.GetBackends()) != 0 {
-		t.Fatalf("Expected backend addrs' length to be 0 but got %d", len(addrMng.GetBackends()))
+		t.Fatalf("Expected backend addrs' length to be 0 but got %d\n", len(addrMng.GetBackends()))
 	}
 }

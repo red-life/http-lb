@@ -28,10 +28,10 @@ func TestURLHash_ChooseBackend(t *testing.T) {
 	for i, test := range tests {
 		chosenBackend, err := urlHash.ChooseBackend(test.input)
 		if err != nil {
-			t.Fatalf("Expected err to be nil but got %s", err)
+			t.Fatalf("Expected err to be nil but got %s\n", err)
 		}
 		if test.expected != chosenBackend {
-			t.Errorf("Failed on %d with Path %s: Expected '%s' but got '%s'", i, test.input.URLPath,
+			t.Errorf("Failed on %d with Path %s: Expected '%s' but got '%s'\n", i, test.input.URLPath,
 				test.expected, chosenBackend)
 		}
 	}
