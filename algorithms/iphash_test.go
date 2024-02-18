@@ -26,7 +26,10 @@ func TestIPHash_ChooseBackend(t *testing.T) {
 		{input: http_lb.Request{RemoteIP: "4.4.4.4"}, expected: backendAddrs[int(http_lb.Hash("4.4.4.4"))%len(backendAddrs)]},
 	}
 	for i, test := range tests {
-		chosenBackend := ipHash.ChooseBackend(test.input)
+		chosenBackend, err := ipHash.ChooseBackend(test.input)
+		if err != nil {
+			t.Fatalf("Expected err to be nil but got %s", err)
+		}
 		if test.expected != chosenBackend {
 			t.Errorf("Failed on %d with IP %s: Expected '%s' but got '%s'", i, test.input.RemoteIP,
 				test.expected, chosenBackend)

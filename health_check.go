@@ -3,7 +3,6 @@ package http_lb
 import (
 	"errors"
 	"fmt"
-	"github.com/red-life/http-lb/algorithms"
 	"time"
 )
 
@@ -56,7 +55,7 @@ func (h *HealthCheck) findUnavailableBackends() []string {
 func (h *HealthCheck) unregister(addrs []string) error {
 	for _, addr := range addrs {
 		err := h.addrsMng.UnregisterBackend(addr)
-		if !errors.Is(err, algorithms.ErrBackendNotExist) {
+		if !errors.Is(err, ErrBackendNotExist) {
 			return err
 		}
 	}
@@ -66,7 +65,7 @@ func (h *HealthCheck) unregister(addrs []string) error {
 func (h *HealthCheck) register(addrs []string) error {
 	for _, addr := range addrs {
 		err := h.addrsMng.RegisterBackend(addr)
-		if !errors.Is(err, algorithms.ErrBackendExists) {
+		if !errors.Is(err, ErrBackendExists) {
 			return err
 		}
 	}

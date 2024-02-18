@@ -18,7 +18,11 @@ type IPHash struct {
 	addrMng http_lb.AddrsManager
 }
 
-func (i *IPHash) ChooseBackend(r http_lb.Request) string {
+func (i *IPHash) ChooseBackend(r http_lb.Request) (string, error) {
 	addrs := i.addrMng.GetBackends()
-	return addrs[int(i.hash(r.RemoteIP))%len(addrs)]
+	if len(addrs) <= 0 {
+		return "", http_lb.ErrNoServerAvailable
+	}
+	idx := int(i.hash(r.RemoteIP)) % len(addrs)
+	return addrs[idx], nil
 }

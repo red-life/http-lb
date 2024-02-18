@@ -23,7 +23,11 @@ type Frontend struct {
 }
 
 func (f *Frontend) Handler(rw http.ResponseWriter, r *http.Request) {
-	f.reqForwarder.Forward(rw, r)
+	err := f.reqForwarder.Forward(rw, r)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadGateway)
+		rw.Write([]byte(err.Error()))
+	}
 }
 
 func (f *Frontend) Run() error {

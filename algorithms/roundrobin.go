@@ -19,13 +19,16 @@ type RoundRobin struct {
 	lock    sync.Mutex
 }
 
-func (r *RoundRobin) ChooseBackend(_ http_lb.Request) string {
+func (r *RoundRobin) ChooseBackend(_ http_lb.Request) (string, error) {
+	addrs := r.addrMng.GetBackends()
+	if len(addrs) <= 0 {
+		return "", http_lb.ErrNoServerAvailable
+	}
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	defer func() { r.counter++ }()
-	addrs := r.addrMng.GetBackends()
 	if r.counter > len(addrs)-1 {
 		r.counter = 0
 	}
-	return addrs[r.counter]
+	return addrs[r.counter], nil
 }

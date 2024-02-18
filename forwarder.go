@@ -11,11 +11,15 @@ type Forwarder struct {
 	reverseProxy ReverseProxy
 }
 
-func (f *Forwarder) Forward(rw http.ResponseWriter, r *http.Request) {
+func (f *Forwarder) Forward(rw http.ResponseWriter, r *http.Request) error {
 	request := Request{
 		RemoteIP: r.RemoteAddr,
 		URLPath:  r.URL.Path,
 	}
-	chosenBackendAddr := f.lbAlgo.ChooseBackend(request)
+	chosenBackendAddr, err := f.lbAlgo.ChooseBackend(request)
+	if err != nil {
+		return err
+	}
 	f.reverseProxy.ServeHTTP(chosenBackendAddr, rw, r)
+	return nil
 }

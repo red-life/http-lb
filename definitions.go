@@ -14,7 +14,7 @@ type AddrsManager interface {
 }
 
 type LoadBalancingAlgorithm interface {
-	ChooseBackend(Request) string
+	ChooseBackend(Request) (string, error)
 }
 
 type ReverseProxy interface {
@@ -22,7 +22,7 @@ type ReverseProxy interface {
 }
 
 type RequestForwarder interface {
-	Forward(http.ResponseWriter, *http.Request)
+	Forward(http.ResponseWriter, *http.Request) error
 }
 
 type HealthChecker interface {

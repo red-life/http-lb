@@ -1,6 +1,7 @@
 package algorithms_test
 
 import (
+	"github.com/red-life/http-lb"
 	"github.com/red-life/http-lb/algorithms"
 	"testing"
 )
@@ -34,9 +35,9 @@ func TestBackendAddrsManager_RegisterBackend(t *testing.T) {
 		{addrs[2], nil},
 		{addrs[3], nil},
 		{addrs[4], nil},
-		{addrs[0], algorithms.ErrBackendExists},
-		{addrs[1], algorithms.ErrBackendExists},
-		{addrs[2], algorithms.ErrBackendExists},
+		{addrs[0], http_lb.ErrBackendExists},
+		{addrs[1], http_lb.ErrBackendExists},
+		{addrs[2], http_lb.ErrBackendExists},
 	}
 	addrMng := algorithms.NewBackendAddrsManager([]string{})
 	for _, test := range tests {
@@ -61,9 +62,9 @@ func TestBackendAddrsManager_UnregisterBackend(t *testing.T) {
 		{addrs[2], nil},
 		{addrs[3], nil},
 		{addrs[4], nil},
-		{addrs[0], algorithms.ErrBackendNotExist},
-		{addrs[1], algorithms.ErrBackendNotExist},
-		{addrs[2], algorithms.ErrBackendNotExist},
+		{addrs[0], http_lb.ErrBackendNotExist},
+		{addrs[1], http_lb.ErrBackendNotExist},
+		{addrs[2], http_lb.ErrBackendNotExist},
 	}
 	addrMng := algorithms.NewBackendAddrsManager(addrs)
 	for _, test := range tests {

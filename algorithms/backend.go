@@ -1,17 +1,11 @@
 package algorithms
 
 import (
-	"errors"
 	http_lb "github.com/red-life/http-lb"
 	"sync"
 )
 
 var _ http_lb.AddrsManager = (*BackendAddrsManager)(nil)
-
-var (
-	ErrBackendExists   = errors.New("backend already exists")
-	ErrBackendNotExist = errors.New("backend doesn't exist")
-)
 
 func NewBackendAddrsManager(backendAddrs []string) *BackendAddrsManager {
 	return &BackendAddrsManager{
@@ -26,7 +20,7 @@ type BackendAddrsManager struct {
 
 func (b *BackendAddrsManager) RegisterBackend(backendAddr string) error {
 	if b.find(backendAddr) != -1 {
-		return ErrBackendExists
+		return http_lb.ErrBackendExists
 	}
 	b.rwLock.Lock()
 	defer b.rwLock.Unlock()
@@ -41,7 +35,7 @@ func (b *BackendAddrsManager) UnregisterBackend(backendAddr string) error {
 		b.backendAddrs = append(b.backendAddrs[:i], b.backendAddrs[i+1:]...)
 		return nil
 	}
-	return ErrBackendNotExist
+	return http_lb.ErrBackendNotExist
 }
 
 func (b *BackendAddrsManager) GetBackends() []string {

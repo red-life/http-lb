@@ -18,8 +18,12 @@ type Random struct {
 	addrMng http_lb.AddrsManager
 }
 
-func (r *Random) ChooseBackend(_ http_lb.Request) string {
+func (r *Random) ChooseBackend(_ http_lb.Request) (string, error) {
 	addrs := r.addrMng.GetBackends()
+	if len(addrs) <= 0 {
+		return "", http_lb.ErrNoServerAvailable
+	}
 	randomNumber, _ := rand.Int(rand.Reader, big.NewInt(int64(len(addrs))))
-	return addrs[int(randomNumber.Int64())]
+	idx := int(randomNumber.Int64())
+	return addrs[idx], nil
 }
