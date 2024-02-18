@@ -7,6 +7,14 @@ import (
 
 var _ RequestForwarder = (*Forwarder)(nil)
 
+func NewForwarder(lbAlgo LoadBalancingAlgorithm, reverseProxy ReverseProxy, logger *zap.Logger) *Forwarder {
+	return &Forwarder{
+		lbAlgo:       lbAlgo,
+		reverseProxy: reverseProxy,
+		logger:       logger,
+	}
+}
+
 type Forwarder struct {
 	lbAlgo       LoadBalancingAlgorithm
 	reverseProxy ReverseProxy
