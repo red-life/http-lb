@@ -19,6 +19,7 @@ func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Durati
 		addrsMng:           addrsMng,
 		expectedStatusCode: expectedStatusCode,
 		logger:             logger,
+		shutdownCh:         make(chan struct{}, 1),
 	}
 }
 
@@ -65,13 +66,19 @@ func (h *HealthCheck) findUnavailableBackends() []string {
 	var unavailableBackends []string
 	for _, addr := range h.addrsMng.GetBackends() {
 		resp, err := HttpGet(fmt.Sprintf("%s/%s", addr, h.endPoint), h.timeout)
-		if err != nil || resp.StatusCode != h.expectedStatusCode {
-			h.logger.Warn("backend went down",
-				zap.String("addr", addr), zap.Error(err), zap.Int("statusCode", resp.StatusCode))
-			unavailableBackends = append(unavailableBackends, addr)
+		if err == nil && resp.StatusCode == h.expectedStatusCode {
+			h.logger.Info("backend is up", zap.String("addr", addr))
 			continue
 		}
-		h.logger.Info("backend is up", zap.String("addr", addr))
+		if err != nil {
+			h.logger.Warn("backend went down", zap.String("addr", addr), zap.Error(err))
+		} else if resp.StatusCode != h.expectedStatusCode {
+			h.logger.Warn("backend went down", zap.Int("statusCode", resp.StatusCode),
+				zap.String("addr", addr))
+		}
+		unavailableBackends = append(unavailableBackends, addr)
+		continue
+
 	}
 	return unavailableBackends
 }
