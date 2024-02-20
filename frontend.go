@@ -8,12 +8,13 @@ import (
 
 var _ GracefulShutdown = (*Frontend)(nil)
 
-func NewFrontend(listenAddr string, tls *TLSOptions, logger *zap.Logger) *Frontend {
+func NewFrontend(listenAddr string, tls *TLSOptions, reqForwarder RequestForwarder, logger *zap.Logger) *Frontend {
 	return &Frontend{
-		listenAddr: listenAddr,
-		mux:        http.NewServeMux(),
-		tls:        tls,
-		logger:     logger,
+		listenAddr:   listenAddr,
+		mux:          http.NewServeMux(),
+		tls:          tls,
+		reqForwarder: reqForwarder,
+		logger:       logger,
 	}
 }
 
