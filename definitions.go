@@ -52,3 +52,8 @@ type Backend struct {
 	Addr      string
 	Transport *http.Transport
 }
+
+type TLSOptions struct {
+	CertFile string
+	KeyFile  string
+}

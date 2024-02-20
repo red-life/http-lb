@@ -18,11 +18,6 @@ func NewFrontend(listenAddr string, tls *TLSOptions, reqForwarder RequestForward
 	}
 }
 
-type TLSOptions struct {
-	CertFile string
-	KeyFile  string
-}
-
 type Frontend struct {
 	listenAddr   string
 	mux          *http.ServeMux
