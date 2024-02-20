@@ -29,6 +29,7 @@ func NewReverseProxy(backends []Backend) *CustomReverseProxy {
 			RewriteXForwarded(request)
 			rewriteURL(request)
 		}
+		rp.Transport = b.Transport
 		reverseProxy.cache[b.Addr] = rp
 	}
 	return reverseProxy
