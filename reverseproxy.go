@@ -20,7 +20,9 @@ func RewriteURL(url *url.URL) func(*httputil.ProxyRequest) {
 }
 
 func NewReverseProxy(backends []Backend) *CustomReverseProxy {
-	reverseProxy := &CustomReverseProxy{}
+	reverseProxy := &CustomReverseProxy{
+		cache: make(map[string]*httputil.ReverseProxy),
+	}
 	for _, b := range backends {
 		parsedURL, _ := url.Parse(b.Addr)
 		rewriteURL := RewriteURL(parsedURL)
