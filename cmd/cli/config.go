@@ -50,17 +50,14 @@ func ParseAndValidateConfig(configFilePath string) (Config, error) {
 	viper.SetConfigFile(configFilePath)
 	err := viper.ReadInConfig()
 	if err != nil {
-		fmt.Println("read in config")
 		return config, err
 	}
 	err = viper.Unmarshal(&config)
 	if err != nil {
-		fmt.Println("unmarshal")
 		return config, err
 	}
 	err = validate.Struct(config)
 	if err != nil {
-		fmt.Println("validate")
 		return config, err
 	}
 	return config, nil
