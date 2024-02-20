@@ -68,7 +68,7 @@ func (h *HealthCheck) findUnavailableBackends() []string {
 	var unavailableBackends []string
 	addrsToCheck := append(h.addrsMng.GetBackends(), h.unavailableBackends...)
 	for _, addr := range addrsToCheck {
-		resp, err := HttpGet(fmt.Sprintf("%s/%s", addr, h.endPoint), h.timeout)
+		resp, err := HttpGet(fmt.Sprintf("%s%s", addr, h.endPoint), h.timeout)
 		if err == nil && resp.StatusCode == h.expectedStatusCode {
 			h.logger.Info("backend is up", zap.String("addr", addr))
 			continue
