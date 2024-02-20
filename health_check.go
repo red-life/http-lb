@@ -56,15 +56,18 @@ func (h *HealthCheck) Shutdown() error {
 func (h *HealthCheck) run() {
 	foundUnavailableBackends := h.findUnavailableBackends()
 	unavailableBackends := DifferenceSlices(foundUnavailableBackends, h.unavailableBackends)
-	availableBackends := DifferenceSlices(h.unavailableBackends, foundUnavailableBackends)
-	h.unavailableBackends = unavailableBackends
-	_ = h.register(availableBackends)
 	_ = h.unregister(unavailableBackends)
+	if len(h.unavailableBackends) > 0 {
+		availableBackends := DifferenceSlices(h.unavailableBackends, foundUnavailableBackends)
+		_ = h.register(availableBackends)
+	}
+	h.unavailableBackends = foundUnavailableBackends
 }
 
 func (h *HealthCheck) findUnavailableBackends() []string {
 	var unavailableBackends []string
-	for _, addr := range h.addrsMng.GetBackends() {
+	addrsToCheck := append(h.addrsMng.GetBackends(), h.unavailableBackends...)
+	for _, addr := range addrsToCheck {
 		resp, err := HttpGet(fmt.Sprintf("%s/%s", addr, h.endPoint), h.timeout)
 		if err == nil && resp.StatusCode == h.expectedStatusCode {
 			h.logger.Info("backend is up", zap.String("addr", addr))
