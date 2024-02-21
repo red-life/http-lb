@@ -78,9 +78,9 @@ health_check:
 
 ## Extensibility
 **HTTP-LB** is designed with extensibility in mind, with every component built upon abstraction. This architecture enables seamless development and customization of each component for effortless integration and utilization.
-- Algorithms: Based on the `LoadBalancingAlgorithm` interface defined in [definitions.go](./definitions.go), allowing for easy implementation of custom load balancing algorithms to suit specific requirements.
-- Request Forwarder: This crucial component handles incoming requests from the frontend, invoking the selected algorithm and forwarding requests to the reverse proxy seamlessly.
-- Health Checker:  Built upon the `HealthChecker` interface, ensuring continuous monitoring of backend server health for enhanced reliability.\
+- **Algorithms**: Based on the `LoadBalancingAlgorithm` interface defined in [definitions.go](./definitions.go), allowing for easy implementation of custom load balancing algorithms to suit specific requirements.
+- **Request Forwarder**: This crucial component handles incoming requests from the frontend, invoking the selected algorithm and forwarding requests to the reverse proxy seamlessly.
+- **Health Checker**:  Built upon the `HealthChecker` interface, ensuring continuous monitoring of backend server health for enhanced reliability.\
 **These components serve as the backbone of the load balancer, with additional components following similar abstraction principles for further extensibility. Explore [definitions.go](./definitions.go) to discover more abstraction-based components ready for customization and expansion.**
 
 
