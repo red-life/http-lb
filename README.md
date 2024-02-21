@@ -6,7 +6,7 @@ A lightweight, extensible Go-based load balancer with extensibility, robust conf
 - **Efficient Containerization**: Fully containerized with Docker, ensuring seamless deployment and portability across diverse environments.
 - **Simplified Execution**: Streamlined execution with a user-friendly Makefile, facilitating straightforward setup and operation.
 - **Versatile Load Balancing**: Supports a wide array of static load balancing algorithms, providing flexibility to optimize traffic distribution.
-- **Modular Architecture**: Built with extensibility in mind, allowing for easy extension and customization of each component to adapt to evolving needs.
+- **Extensibility**: Built with extensibility in mind, allowing for easy extension and customization of each component to adapt to evolving needs.
 - **Robust Health Monitoring**: Empowered with built-in health checks, ensuring continuous monitoring of backend server health for enhanced reliability.
 - **Enhanced Monitoring Capabilities**: Equipped with comprehensive logging features, making it well-suited for integration with monitoring tools to track performance metrics and diagnose issues effectively.
 
