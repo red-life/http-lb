@@ -25,14 +25,14 @@ type TLS struct {
 }
 
 type Backend struct {
-	Servers   []string      `mapstructure:"servers" validate:"url,required"`
+	Servers   []string      `mapstructure:"servers" validate:"required"`
 	Timeout   time.Duration `mapstructure:"timeout" validate:"min=1ms,required"`
-	KeepAlive KeepAlive     `mapstructure:"keep_alive"`
+	KeepAlive KeepAlive     `mapstructure:"keep_alive" validate:"required"`
 }
 
 type KeepAlive struct {
-	MaxIdle     int           `mapstrcutre:"max_idle_connections" validate:"min=1,required"`
-	IdleTimeout time.Duration `mapstrcutre:"idle_connection_timeout" validate:"min=1ms,required"`
+	MaxIdle     int           `mapstructure:"max_idle_connections" validate:"min=1,required"`
+	IdleTimeout time.Duration `mapstructure:"idle_connection_timeout" validate:"min=1ms,required"`
 }
 
 type HealthCheck struct {
