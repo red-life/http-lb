@@ -60,16 +60,16 @@ health_check:
     **If you want to know how they work, read this article [HERE](https://blog.bytebytego.com/i/103707419/what-are-the-common-load-balancing-algorithms)**
 - `log_level`: Sets the logging level for monitoring purposes. Options range from `info` to `debug`.
 - `frontend`: It's responsible for accepting the incoming requests
-    - `listen`: Specifies the IP and port for the HTTP server to listen on. Sync the port with the `PORT` variable in [Makefile](./Makefile)
-    - **OPTIONAL** `tls`: If you want the front-end only accepts tls requests (**Recommended**) \
+    - `listen`: Specifies the IP and port for the HTTP server to listen on.
+    - **OPTIONAL** `tls`: If you want the front-end only accepts tls requests. Also, don't forget to uncomment the line to map the tls files to container using volumes (**Recommended**) 
         - `cert`: The path to the certificate file.
-        - `key`: The path to the private key file. \
+        - `key`: The path to the private key file.
 - `backend`: The most important field. You define your backends in an array.
     - `address`: URL of the backend server.
     - `timeout`: Timeout for requests to the backend.
     - **OPTIONAL** `keep_alive`: If you don't want the reverse proxy creates connection for each request keep the keep_alive field.
         - `max_idle_connections`: Maximum number of idle connections (0 for no limit).
-        - `idle_connection_timeout`: The maximum amount of time an idle connection will remain idle before closing itself. (0 means no limit) \
+        - `idle_connection_timeout`: The maximum amount of time an idle connection will remain idle before closing itself. (0 means no limit)
 - `health_check`: Monitors backend health and adjusts routing accordingly.
     - `endpoint`: Path for the health check to verify backend availability.
     - `expected_status_code`: Expected HTTP status code indicating backend health.
