@@ -28,6 +28,8 @@ type Frontend struct {
 }
 
 func (f *Frontend) Handler(rw http.ResponseWriter, r *http.Request) {
+	f.logger.Info("request received", zap.String("ip", r.RemoteAddr),
+		zap.String("path", r.RequestURI), zap.String("method", r.Method))
 	err := f.reqForwarder.Forward(rw, r)
 	if err != nil {
 		f.logger.Error("failed to forward request", zap.String("ip", r.RemoteAddr),
@@ -36,8 +38,6 @@ func (f *Frontend) Handler(rw http.ResponseWriter, r *http.Request) {
 		rw.Write([]byte(err.Error()))
 		return
 	}
-	f.logger.Info("request forwarded", zap.String("ip", r.RemoteAddr),
-		zap.String("path", r.RequestURI), zap.String("method", r.Method))
 }
 
 func (f *Frontend) Run() error {
