@@ -36,14 +36,14 @@ type HealthCheck struct {
 
 func (h *HealthCheck) Run() {
 	go func() {
-		for {
+		ticker := time.NewTicker(h.interval)
+		for range ticker.C {
 			select {
 			case <-h.shutdownCh:
 				return
 			default:
 				h.run()
 			}
-			time.Sleep(h.interval)
 		}
 	}()
 }
