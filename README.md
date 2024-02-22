@@ -60,8 +60,8 @@ health_check:
     **If you want to know how they work, read this article [HERE](https://blog.bytebytego.com/i/103707419/what-are-the-common-load-balancing-algorithms)**
 - `log_level`: Sets the logging level for monitoring purposes. Options range from `info` to `debug`.
 - `frontend`: It's responsible for accepting the incoming requests
-    - `listen`: Specifies the IP and port for the HTTP server to listen on.
-    - **OPTIONAL** `tls`: If you want the front-end only accepts tls requests. Also, don't forget to uncomment the line to map the tls files to container using volumes (**Recommended**) 
+    - `listen`: Specifies the IP and port for the HTTP server to listen on. \
+    - **OPTIONAL** `tls`: If you want the front-end only accepts tls requests. Also, don't forget to uncomment the line to map the tls files to container using volumes in [Makefile](./Makefile) (**Recommended**) 
         - `cert`: The path to the certificate file.
         - `key`: The path to the private key file.
 - `backend`: The most important field. You define your backends in an array.
