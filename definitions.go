@@ -35,7 +35,7 @@ type ReverseProxyFactory interface {
 }
 
 type TransportFactory interface {
-	Create(string) (*http.Transport, error)
+	Create() *http.Transport
 }
 
 type Request struct {
