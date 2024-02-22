@@ -13,24 +13,24 @@ var _ http_lb.LoadBalancingAlgorithm = (*StickyRoundRobin)(nil)
 const DefaultExpiration = 30 * time.Minute
 const DefaultCleanupInterval = 15 * time.Minute
 
-func NewStickyRoundRobin(addrMng http_lb.AddrsManager, logger *zap.Logger) *StickyRoundRobin {
+func NewStickyRoundRobin(backendPool http_lb.BackendPool, logger *zap.Logger) *StickyRoundRobin {
 	return &StickyRoundRobin{
-		cache:   cache.New(DefaultExpiration, DefaultCleanupInterval),
-		addrMng: addrMng,
-		logger:  logger,
+		cache:       cache.New(DefaultExpiration, DefaultCleanupInterval),
+		backendPool: backendPool,
+		logger:      logger,
 	}
 }
 
 type StickyRoundRobin struct {
-	counter int
-	cache   *cache.Cache
-	addrMng http_lb.AddrsManager
-	lock    sync.Mutex
-	logger  *zap.Logger
+	counter     int
+	cache       *cache.Cache
+	backendPool http_lb.BackendPool
+	lock        sync.Mutex
+	logger      *zap.Logger
 }
 
 func (s *StickyRoundRobin) ChooseBackend(r http_lb.Request) (string, error) {
-	addrs := s.addrMng.GetBackends()
+	addrs := s.backendPool.Backends()
 	if len(addrs) <= 0 {
 		s.logger.Error("no backend available")
 		return "", http_lb.ErrNoServerAvailable

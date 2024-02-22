@@ -17,8 +17,8 @@ func TestRoundRobin_ChooseBackend(t *testing.T) {
 		"addr 6",
 	}
 	logger, _ := zap.NewDevelopment()
-	addrMng := algorithms.NewBackendAddrsManager(backendAddrs, logger)
-	rr := algorithms.NewRoundRobin(addrMng, logger)
+	backendPool := algorithms.NewBackendPool(backendAddrs, logger)
+	rr := algorithms.NewRoundRobin(backendPool, logger)
 	for i := 0; i < 100; i++ {
 		expected := backendAddrs[i%len(backendAddrs)]
 		chosenBackend, err := rr.ChooseBackend(http_lb.Request{})

@@ -7,22 +7,22 @@ import (
 
 var _ http_lb.LoadBalancingAlgorithm = (*URLHash)(nil)
 
-func NewURLHash(hash http_lb.HashingAlgorithm, addrMng http_lb.AddrsManager, logger *zap.Logger) *URLHash {
+func NewURLHash(hash http_lb.HashingAlgorithm, backendPool http_lb.BackendPool, logger *zap.Logger) *URLHash {
 	return &URLHash{
-		hash:    hash,
-		addrMng: addrMng,
-		logger:  logger,
+		hash:        hash,
+		backendPool: backendPool,
+		logger:      logger,
 	}
 }
 
 type URLHash struct {
-	hash    http_lb.HashingAlgorithm
-	addrMng http_lb.AddrsManager
-	logger  *zap.Logger
+	hash        http_lb.HashingAlgorithm
+	backendPool http_lb.BackendPool
+	logger      *zap.Logger
 }
 
 func (u *URLHash) ChooseBackend(r http_lb.Request) (string, error) {
-	addrs := u.addrMng.GetBackends()
+	addrs := u.backendPool.Backends()
 	if len(addrs) <= 0 {
 		u.logger.Error("no backend available")
 		return "", http_lb.ErrNoServerAvailable

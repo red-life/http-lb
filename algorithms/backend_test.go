@@ -41,15 +41,15 @@ func TestBackendAddrsManager_RegisterBackend(t *testing.T) {
 		{addrs[2], http_lb.ErrBackendExists},
 	}
 	logger, _ := zap.NewDevelopment()
-	addrMng := algorithms.NewBackendAddrsManager([]string{}, logger)
+	backendPool := algorithms.NewBackendPool([]string{}, logger)
 	for _, test := range tests {
-		err := addrMng.RegisterBackend(test.input)
+		err := backendPool.RegisterBackend(test.input)
 		if err != test.expected {
 			t.Fatalf("Expected err to be %s but got %s", test.expected, err)
 		}
 	}
-	if !isEqual(addrs, addrMng.GetBackends()) {
-		t.Fatalf("Expected all backend addrs to be registered but got %+v", addrMng.GetBackends())
+	if !isEqual(addrs, backendPool.Backends()) {
+		t.Fatalf("Expected all backend addrs to be registered but got %+v", backendPool.Backends())
 	}
 }
 
@@ -69,14 +69,14 @@ func TestBackendAddrsManager_UnregisterBackend(t *testing.T) {
 		{addrs[2], http_lb.ErrBackendNotExist},
 	}
 	logger, _ := zap.NewDevelopment()
-	addrMng := algorithms.NewBackendAddrsManager(addrs, logger)
+	backendPool := algorithms.NewBackendPool(addrs, logger)
 	for _, test := range tests {
-		err := addrMng.UnregisterBackend(test.input)
+		err := backendPool.UnregisterBackend(test.input)
 		if err != test.expected {
 			t.Fatalf("Expected err to be %s but got %s\n", test.expected, err)
 		}
 	}
-	if len(addrMng.GetBackends()) != 0 {
-		t.Fatalf("Expected backend addrs' length to be 0 but got %d\n", len(addrMng.GetBackends()))
+	if len(backendPool.Backends()) != 0 {
+		t.Fatalf("Expected backend addrs' length to be 0 but got %d\n", len(backendPool.Backends()))
 	}
 }

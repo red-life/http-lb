@@ -10,13 +10,13 @@ import (
 var _ HealthChecker = (*HealthCheck)(nil)
 var _ GracefulShutdown = (*HealthCheck)(nil)
 
-func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Duration, addrsMng AddrsManager,
+func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Duration, serverPool BackendPool,
 	expectedStatusCode int, logger *zap.Logger) *HealthCheck {
 	return &HealthCheck{
 		endPoint:           endPoint,
 		interval:           interval,
 		timeout:            timeout,
-		addrsMng:           addrsMng,
+		serverPool:         serverPool,
 		expectedStatusCode: expectedStatusCode,
 		logger:             logger,
 		shutdownCh:         make(chan struct{}, 1),
@@ -27,7 +27,7 @@ type HealthCheck struct {
 	endPoint            string
 	interval            time.Duration
 	timeout             time.Duration
-	addrsMng            AddrsManager
+	serverPool          BackendPool
 	expectedStatusCode  int
 	unavailableBackends []string
 	logger              *zap.Logger
@@ -66,7 +66,7 @@ func (h *HealthCheck) run() {
 
 func (h *HealthCheck) findUnavailableBackends() []string {
 	var unavailableBackends []string
-	addrsToCheck := append(h.addrsMng.GetBackends(), h.unavailableBackends...)
+	addrsToCheck := append(h.serverPool.Backends(), h.unavailableBackends...)
 	for _, addr := range addrsToCheck {
 		resp, err := HttpGet(fmt.Sprintf("%s%s", addr, h.endPoint), h.timeout)
 		if err == nil && resp.StatusCode == h.expectedStatusCode {
@@ -88,7 +88,7 @@ func (h *HealthCheck) findUnavailableBackends() []string {
 
 func (h *HealthCheck) unregister(addrs []string) error {
 	for _, addr := range addrs {
-		err := h.addrsMng.UnregisterBackend(addr)
+		err := h.serverPool.UnregisterBackend(addr)
 		if !errors.Is(err, ErrBackendNotExist) {
 			return err
 		}
@@ -98,7 +98,7 @@ func (h *HealthCheck) unregister(addrs []string) error {
 
 func (h *HealthCheck) register(addrs []string) error {
 	for _, addr := range addrs {
-		err := h.addrsMng.RegisterBackend(addr)
+		err := h.serverPool.RegisterBackend(addr)
 		if !errors.Is(err, ErrBackendExists) {
 			return err
 		}

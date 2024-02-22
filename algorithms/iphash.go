@@ -7,22 +7,22 @@ import (
 
 var _ http_lb.LoadBalancingAlgorithm = (*IPHash)(nil)
 
-func NewIPHash(hash http_lb.HashingAlgorithm, addrMng http_lb.AddrsManager, logger *zap.Logger) *IPHash {
+func NewIPHash(hash http_lb.HashingAlgorithm, backendPool http_lb.BackendPool, logger *zap.Logger) *IPHash {
 	return &IPHash{
-		hash:    hash,
-		addrMng: addrMng,
-		logger:  logger,
+		hash:        hash,
+		backendPool: backendPool,
+		logger:      logger,
 	}
 }
 
 type IPHash struct {
-	hash    http_lb.HashingAlgorithm
-	addrMng http_lb.AddrsManager
-	logger  *zap.Logger
+	hash        http_lb.HashingAlgorithm
+	backendPool http_lb.BackendPool
+	logger      *zap.Logger
 }
 
 func (i *IPHash) ChooseBackend(r http_lb.Request) (string, error) {
-	addrs := i.addrMng.GetBackends()
+	addrs := i.backendPool.Backends()
 	if len(addrs) <= 0 {
 		i.logger.Error("no backend available")
 		return "", http_lb.ErrNoServerAvailable

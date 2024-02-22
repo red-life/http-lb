@@ -17,8 +17,8 @@ func TestIPHash_ChooseBackend(t *testing.T) {
 		"addr 6",
 	}
 	logger, _ := zap.NewDevelopment()
-	addrMng := algorithms.NewBackendAddrsManager(backendAddrs, logger)
-	ipHash := algorithms.NewIPHash(http_lb.Hash, addrMng, logger)
+	backendPool := algorithms.NewBackendPool(backendAddrs, logger)
+	ipHash := algorithms.NewIPHash(http_lb.Hash, backendPool, logger)
 	tests := []struct {
 		input    http_lb.Request
 		expected string

@@ -6,22 +6,22 @@ import (
 	"sync"
 )
 
-var _ http_lb.AddrsManager = (*BackendAddrsManager)(nil)
+var _ http_lb.BackendPool = (*BackendPool)(nil)
 
-func NewBackendAddrsManager(backendAddrs []string, logger *zap.Logger) *BackendAddrsManager {
-	return &BackendAddrsManager{
+func NewBackendPool(backendAddrs []string, logger *zap.Logger) *BackendPool {
+	return &BackendPool{
 		backendAddrs: http_lb.CopySlice(backendAddrs),
 		logger:       logger,
 	}
 }
 
-type BackendAddrsManager struct {
+type BackendPool struct {
 	backendAddrs []string
 	rwLock       sync.RWMutex
 	logger       *zap.Logger
 }
 
-func (b *BackendAddrsManager) RegisterBackend(backendAddr string) error {
+func (b *BackendPool) RegisterBackend(backendAddr string) error {
 	if b.find(backendAddr) != -1 {
 		return http_lb.ErrBackendExists
 	}
@@ -32,7 +32,7 @@ func (b *BackendAddrsManager) RegisterBackend(backendAddr string) error {
 	return nil
 }
 
-func (b *BackendAddrsManager) UnregisterBackend(backendAddr string) error {
+func (b *BackendPool) UnregisterBackend(backendAddr string) error {
 	if i := b.find(backendAddr); i != -1 {
 		b.rwLock.Lock()
 		defer b.rwLock.Unlock()
@@ -43,13 +43,13 @@ func (b *BackendAddrsManager) UnregisterBackend(backendAddr string) error {
 	return http_lb.ErrBackendNotExist
 }
 
-func (b *BackendAddrsManager) GetBackends() []string {
+func (b *BackendPool) Backends() []string {
 	b.rwLock.RLock()
 	defer b.rwLock.RUnlock()
 	return http_lb.CopySlice(b.backendAddrs)
 }
 
-func (b *BackendAddrsManager) find(backendAddr string) int {
+func (b *BackendPool) find(backendAddr string) int {
 	b.rwLock.RLock()
 	defer b.rwLock.RUnlock()
 	for i, backend := range b.backendAddrs {

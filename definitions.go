@@ -7,10 +7,10 @@ import (
 
 type HashingAlgorithm func(string) uint
 
-type AddrsManager interface {
+type BackendPool interface {
 	RegisterBackend(string) error
 	UnregisterBackend(string) error
-	GetBackends() []string
+	Backends() []string
 }
 
 type LoadBalancingAlgorithm interface {

@@ -9,20 +9,20 @@ import (
 
 var _ http_lb.LoadBalancingAlgorithm = (*Random)(nil)
 
-func NewRandom(addrMng http_lb.AddrsManager, logger *zap.Logger) *Random {
+func NewRandom(backendPool http_lb.BackendPool, logger *zap.Logger) *Random {
 	return &Random{
-		addrMng: addrMng,
-		logger:  logger,
+		backendPool: backendPool,
+		logger:      logger,
 	}
 }
 
 type Random struct {
-	addrMng http_lb.AddrsManager
-	logger  *zap.Logger
+	backendPool http_lb.BackendPool
+	logger      *zap.Logger
 }
 
 func (r *Random) ChooseBackend(_ http_lb.Request) (string, error) {
-	addrs := r.addrMng.GetBackends()
+	addrs := r.backendPool.Backends()
 	if len(addrs) <= 0 {
 		r.logger.Error("no backend available")
 		return "", http_lb.ErrNoServerAvailable
