@@ -13,7 +13,7 @@ build:
 	docker build -t http-lb .
 
 run:
-	#make build
+	make build
 	docker run $(RUN_ARGS) http-lb
 
 run_dev:
