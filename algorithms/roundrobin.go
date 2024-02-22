@@ -8,31 +8,31 @@ import (
 
 var _ http_lb.LoadBalancingAlgorithm = (*RoundRobin)(nil)
 
-func NewRoundRobin(backendPool http_lb.BackendPool, logger *zap.Logger) *RoundRobin {
+func NewRoundRobin(serverPool http_lb.ServerPool, logger *zap.Logger) *RoundRobin {
 	return &RoundRobin{
-		backendPool: backendPool,
-		logger:      logger,
+		serverPool: serverPool,
+		logger:     logger,
 	}
 }
 
 type RoundRobin struct {
-	counter     int
-	backendPool http_lb.BackendPool
-	lock        sync.Mutex
-	logger      *zap.Logger
+	counter    int
+	serverPool http_lb.ServerPool
+	lock       sync.Mutex
+	logger     *zap.Logger
 }
 
-func (r *RoundRobin) SelectBackend(_ http_lb.Request) (string, error) {
-	addrs := r.backendPool.Backends()
-	if len(addrs) <= 0 {
-		r.logger.Error("no backend available")
+func (r *RoundRobin) SelectServer(_ http_lb.Request) (string, error) {
+	servers := r.serverPool.Servers()
+	if len(servers) <= 0 {
+		r.logger.Error("no server is available")
 		return "", http_lb.ErrNoServerAvailable
 	}
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	defer func() { r.counter++ }()
-	if r.counter > len(addrs)-1 {
+	if r.counter > len(servers)-1 {
 		r.counter = 0
 	}
-	return addrs[r.counter], nil
+	return servers[r.counter], nil
 }

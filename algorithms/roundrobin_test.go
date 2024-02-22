@@ -7,26 +7,26 @@ import (
 	"testing"
 )
 
-func TestRoundRobin_ChooseBackend(t *testing.T) {
-	backendAddrs := []string{
-		"addr 1",
-		"addr 2",
-		"addr 3",
-		"addr 4",
-		"addr 5",
-		"addr 6",
+func TestRoundRobin_SelectServer(t *testing.T) {
+	servers := []string{
+		"server 1",
+		"server 2",
+		"server 3",
+		"server 4",
+		"server 5",
+		"server 6",
 	}
 	logger, _ := zap.NewDevelopment()
-	backendPool := algorithms.NewBackendPool(backendAddrs, logger)
-	rr := algorithms.NewRoundRobin(backendPool, logger)
+	serverPool := algorithms.NewServerPool(servers, logger)
+	rr := algorithms.NewRoundRobin(serverPool, logger)
 	for i := 0; i < 100; i++ {
-		expected := backendAddrs[i%len(backendAddrs)]
-		chosenBackend, err := rr.SelectBackend(http_lb.Request{})
+		expected := servers[i%len(servers)]
+		selectedServer, err := rr.SelectServer(http_lb.Request{})
 		if err != nil {
 			t.Fatalf("Expected err to be nil but got %s\n", err)
 		}
-		if expected != chosenBackend {
-			t.Errorf("Failed on %d: Expected '%s' but got '%s'\n", i, expected, chosenBackend)
+		if expected != selectedServer {
+			t.Errorf("Failed on %d: Expected '%s' but got '%s'\n", i, expected, selectedServer)
 		}
 	}
 }

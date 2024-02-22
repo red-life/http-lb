@@ -10,7 +10,7 @@ import (
 var _ HealthChecker = (*HealthCheck)(nil)
 var _ GracefulShutdown = (*HealthCheck)(nil)
 
-func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Duration, serverPool BackendPool,
+func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Duration, serverPool ServerPool,
 	expectedStatusCode int, logger *zap.Logger) *HealthCheck {
 	return &HealthCheck{
 		endPoint:           endPoint,
@@ -27,7 +27,7 @@ type HealthCheck struct {
 	endPoint            string
 	interval            time.Duration
 	timeout             time.Duration
-	serverPool          BackendPool
+	serverPool          ServerPool
 	expectedStatusCode  int
 	unavailableBackends []string
 	logger              *zap.Logger
@@ -66,7 +66,7 @@ func (h *HealthCheck) run() {
 
 func (h *HealthCheck) findUnavailableBackends() []string {
 	var unavailableBackends []string
-	addrsToCheck := append(h.serverPool.Backends(), h.unavailableBackends...)
+	addrsToCheck := append(h.serverPool.Servers(), h.unavailableBackends...)
 	for _, addr := range addrsToCheck {
 		resp, err := HttpGet(fmt.Sprintf("%s%s", addr, h.endPoint), h.timeout)
 		if err == nil && resp.StatusCode == h.expectedStatusCode {
@@ -88,8 +88,8 @@ func (h *HealthCheck) findUnavailableBackends() []string {
 
 func (h *HealthCheck) unregister(addrs []string) error {
 	for _, addr := range addrs {
-		err := h.serverPool.UnregisterBackend(addr)
-		if !errors.Is(err, ErrBackendNotExist) {
+		err := h.serverPool.UnregisterServer(addr)
+		if !errors.Is(err, ErrServerNotExist) {
 			return err
 		}
 	}
@@ -98,8 +98,8 @@ func (h *HealthCheck) unregister(addrs []string) error {
 
 func (h *HealthCheck) register(addrs []string) error {
 	for _, addr := range addrs {
-		err := h.serverPool.RegisterBackend(addr)
-		if !errors.Is(err, ErrBackendExists) {
+		err := h.serverPool.RegisterServer(addr)
+		if !errors.Is(err, ErrServerExists) {
 			return err
 		}
 	}

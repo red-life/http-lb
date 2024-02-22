@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	ErrBackendExists     = errors.New("backend already exists")
-	ErrBackendNotExist   = errors.New("backend doesn't exist")
+	ErrServerExists      = errors.New("server already exists")
+	ErrServerNotExist    = errors.New("server doesn't exist")
 	ErrNoServerAvailable = errors.New("no server is available")
 )

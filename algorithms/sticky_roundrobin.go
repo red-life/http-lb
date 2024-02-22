@@ -13,47 +13,47 @@ var _ http_lb.LoadBalancingAlgorithm = (*StickyRoundRobin)(nil)
 const DefaultExpiration = 30 * time.Minute
 const DefaultCleanupInterval = 15 * time.Minute
 
-func NewStickyRoundRobin(backendPool http_lb.BackendPool, logger *zap.Logger) *StickyRoundRobin {
+func NewStickyRoundRobin(serverPool http_lb.ServerPool, logger *zap.Logger) *StickyRoundRobin {
 	return &StickyRoundRobin{
-		cache:       cache.New(DefaultExpiration, DefaultCleanupInterval),
-		backendPool: backendPool,
-		logger:      logger,
+		cache:      cache.New(DefaultExpiration, DefaultCleanupInterval),
+		serverPool: serverPool,
+		logger:     logger,
 	}
 }
 
 type StickyRoundRobin struct {
-	counter     int
-	cache       *cache.Cache
-	backendPool http_lb.BackendPool
-	lock        sync.Mutex
-	logger      *zap.Logger
+	counter    int
+	cache      *cache.Cache
+	serverPool http_lb.ServerPool
+	lock       sync.Mutex
+	logger     *zap.Logger
 }
 
-func (s *StickyRoundRobin) SelectBackend(r http_lb.Request) (string, error) {
-	addrs := s.backendPool.Backends()
-	if len(addrs) <= 0 {
-		s.logger.Error("no backend available")
+func (s *StickyRoundRobin) SelectServer(r http_lb.Request) (string, error) {
+	servers := s.serverPool.Servers()
+	if len(servers) <= 0 {
+		s.logger.Error("no server is available")
 		return "", http_lb.ErrNoServerAvailable
 	}
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	requestIP := r.RemoteIP
-	if backend, ok := s.cache.Get(requestIP); ok {
-		if http_lb.ContainsSlice(addrs, backend.(string)) {
-			s.logger.Debug("backend addr found in cache",
-				zap.String("addr", backend.(string)), zap.String("cacheKey", requestIP))
-			return backend.(string), nil
+	if server, ok := s.cache.Get(requestIP); ok {
+		if http_lb.ContainsSlice(servers, server.(string)) {
+			s.logger.Debug("server found in cache",
+				zap.String("server", server.(string)), zap.String("cacheKey", requestIP))
+			return server.(string), nil
 		} else {
-			s.logger.Debug("invalidate cached backend addr",
-				zap.String("addr", backend.(string)), zap.String("cacheKey", requestIP))
+			s.logger.Debug("invalidate cached server",
+				zap.String("server", server.(string)), zap.String("cacheKey", requestIP))
 			s.cache.Delete(requestIP)
 		}
 	}
-	if s.counter > len(addrs)-1 {
+	if s.counter > len(servers)-1 {
 		s.counter = 0
 	}
-	chosenBackend := addrs[s.counter]
-	s.cache.SetDefault(requestIP, chosenBackend)
+	selectedServer := servers[s.counter]
+	s.cache.SetDefault(requestIP, selectedServer)
 	s.counter++
-	return chosenBackend, nil
+	return selectedServer, nil
 }

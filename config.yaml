@@ -8,17 +8,14 @@ frontend:
 #    key: key.key
 
 backend:
-  - address: http://127.0.0.1:5001
-    timeout: 1s # ms, s, min, h
-    keep_alive:
-      max_idle_connections: 100 # 0 means no limit
-      idle_connection_timeout: 30s # maximum amount of time an idle connection will remain idle before closing itself. (0 means no limit)
+  servers:
+    - http://127.0.0.1:5001
+    - http://127.0.0.1:5002
+  timeout: 1s # ms, s, min, h
+  keep_alive:
+    max_idle_connections: 100 # 0 means no limit
+    idle_connection_timeout: 30s # maximum amount of time an idle connection will remain idle before closing itself. (0 means no limit)
 
-  - address: http://127.0.0.1:5002
-    timeout: 2s
-    keep_alive:
-      max_idle_connections: 50
-      idle_connection_timeout: 10s
 
 health_check:
   endpoint: /health_check

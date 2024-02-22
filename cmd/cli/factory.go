@@ -28,7 +28,7 @@ func FrontendFactory(frontend Frontend, reqForwarder http_lb.RequestForwarder, l
 	return http_lb.NewFrontend(frontend.Listen, tls, reqForwarder, logger)
 }
 
-func HealthCheckFactory(healthCheck HealthCheck, serverPool http_lb.BackendPool, logger *zap.Logger) *http_lb.HealthCheck {
+func HealthCheckFactory(healthCheck HealthCheck, serverPool http_lb.ServerPool, logger *zap.Logger) *http_lb.HealthCheck {
 	return http_lb.NewHealthCheck(healthCheck.Endpoint, healthCheck.Interval, healthCheck.Timeout, serverPool, healthCheck.ExpectedStatusCode, logger)
 }
 
@@ -36,7 +36,7 @@ func RequestForwarderFactory(lbAlgo http_lb.LoadBalancingAlgorithm, rpFactory ht
 	return http_lb.NewForwarder(lbAlgo, rpFactory, logger)
 }
 
-func LoadBalancingAlgorithmFactory(addrMng http_lb.BackendPool,
+func LoadBalancingAlgorithmFactory(addrMng http_lb.ServerPool,
 	hash http_lb.HashingAlgorithm, logger *zap.Logger) func(algorithmName string) http_lb.LoadBalancingAlgorithm {
 	return func(algorithmName string) http_lb.LoadBalancingAlgorithm {
 		if algorithmName == "round-robin" {
@@ -55,10 +55,10 @@ func LoadBalancingAlgorithmFactory(addrMng http_lb.BackendPool,
 	}
 }
 
-func ServerPoolFactory(backendsConfig Backend, logger *zap.Logger) http_lb.BackendPool {
+func ServerPoolFactory(backendsConfig Backend, logger *zap.Logger) http_lb.ServerPool {
 	var backends []string
-	for _, addr := range backendsConfig.Addresses {
+	for _, addr := range backendsConfig.Servers {
 		backends = append(backends, addr)
 	}
-	return algorithms.NewBackendPool(backends, logger)
+	return algorithms.NewServerPool(backends, logger)
 }

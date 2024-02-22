@@ -25,7 +25,7 @@ type TLS struct {
 }
 
 type Backend struct {
-	Addresses []string      `mapstructure:"address" validate:"url,required"`
+	Servers   []string      `mapstructure:"servers" validate:"url,required"`
 	Timeout   time.Duration `mapstructure:"timeout" validate:"min=1ms,required"`
 	KeepAlive KeepAlive     `mapstructure:"keep_alive"`
 }

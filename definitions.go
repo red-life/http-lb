@@ -8,14 +8,14 @@ import (
 
 type HashingAlgorithm func(string) uint
 
-type BackendPool interface {
-	RegisterBackend(string) error
-	UnregisterBackend(string) error
-	Backends() []string
+type ServerPool interface {
+	RegisterServer(string) error
+	UnregisterServer(string) error
+	Servers() []string
 }
 
 type LoadBalancingAlgorithm interface {
-	SelectBackend(Request) (string, error)
+	SelectServer(Request) (string, error)
 }
 
 type RequestForwarder interface {
