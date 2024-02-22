@@ -2,6 +2,7 @@ package http_lb
 
 import (
 	"net/http"
+	"net/http/httputil"
 	"time"
 )
 
@@ -17,10 +18,6 @@ type LoadBalancingAlgorithm interface {
 	SelectBackend(Request) (string, error)
 }
 
-type ReverseProxy interface {
-	ServeHTTP(string, http.ResponseWriter, *http.Request)
-}
-
 type RequestForwarder interface {
 	Forward(http.ResponseWriter, *http.Request) error
 }
@@ -31,6 +28,14 @@ type HealthChecker interface {
 
 type GracefulShutdown interface {
 	Shutdown() error
+}
+
+type ReverseProxyFactory interface {
+	Create(string) (*httputil.ReverseProxy, error)
+}
+
+type TransportFactory interface {
+	Create(string) (*http.Transport, error)
 }
 
 type Request struct {
