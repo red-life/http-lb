@@ -3,7 +3,6 @@ package http_lb
 import (
 	"net/http"
 	"net/http/httputil"
-	"time"
 )
 
 type HashingAlgorithm func(string) uint
@@ -41,21 +40,6 @@ type TransportFactory interface {
 type Request struct {
 	RemoteIP string
 	URLPath  string
-}
-
-type KeepAlive struct {
-	MaxIdleConns     int
-	IdleConnsTimeout time.Duration
-}
-
-type TransportOptions struct {
-	Timeout   time.Duration
-	KeepAlive *KeepAlive
-}
-
-type Backend struct {
-	Addr      string
-	Transport *http.Transport
 }
 
 type TLSOptions struct {
