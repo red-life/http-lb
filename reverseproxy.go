@@ -18,10 +18,9 @@ func RewriteURL(url *url.URL) func(*httputil.ProxyRequest) {
 	}
 }
 
-func NewRPFactory(transportFactory TransportFactory, reWriters ...func(request *httputil.ProxyRequest)) *RPFactory {
+func NewRPFactory(transportFactory TransportFactory) *RPFactory {
 	reverseProxy := &RPFactory{
 		cache:            make(map[string]*httputil.ReverseProxy),
-		reWriters:        reWriters,
 		transportFactory: transportFactory,
 	}
 	return reverseProxy
@@ -29,7 +28,6 @@ func NewRPFactory(transportFactory TransportFactory, reWriters ...func(request *
 
 type RPFactory struct {
 	cache            map[string]*httputil.ReverseProxy
-	reWriters        []func(request *httputil.ProxyRequest)
 	transportFactory TransportFactory
 }
 
@@ -38,18 +36,13 @@ func (rp *RPFactory) Create(backendAddr string) (*httputil.ReverseProxy, error) 
 		return proxy, nil
 	}
 	proxy := &httputil.ReverseProxy{}
-	if len(rp.reWriters) > 0 {
-		proxy.Rewrite = func(request *httputil.ProxyRequest) {
-			for _, reWriter := range rp.reWriters {
-				reWriter(request)
-			}
-		}
+	parsedUrl, _ := url.Parse(backendAddr)
+	rewriteURL := RewriteURL(parsedUrl)
+	proxy.Rewrite = func(request *httputil.ProxyRequest) {
+		RewriteXForwarded(request)
+		rewriteURL(request)
 	}
-	transport, err := rp.transportFactory.Create(backendAddr)
-	if err != nil {
-		return nil, err
-	}
-	proxy.Transport = transport
+	proxy.Transport = rp.transportFactory.Create()
 	rp.cache[backendAddr] = proxy
 	return proxy, nil
 }
