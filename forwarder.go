@@ -7,18 +7,18 @@ import (
 
 var _ RequestForwarder = (*Forwarder)(nil)
 
-func NewForwarder(lbAlgo LoadBalancingAlgorithm, reverseProxy ReverseProxy, logger *zap.Logger) *Forwarder {
+func NewForwarder(lbAlgo LoadBalancingAlgorithm, rpFactory ReverseProxyFactory, logger *zap.Logger) *Forwarder {
 	return &Forwarder{
-		lbAlgo:       lbAlgo,
-		reverseProxy: reverseProxy,
-		logger:       logger,
+		lbAlgo:    lbAlgo,
+		rpFactory: rpFactory,
+		logger:    logger,
 	}
 }
 
 type Forwarder struct {
-	lbAlgo       LoadBalancingAlgorithm
-	reverseProxy ReverseProxy
-	logger       *zap.Logger
+	lbAlgo    LoadBalancingAlgorithm
+	rpFactory ReverseProxyFactory
+	logger    *zap.Logger
 }
 
 func (f *Forwarder) Forward(rw http.ResponseWriter, r *http.Request) error {
@@ -26,11 +26,15 @@ func (f *Forwarder) Forward(rw http.ResponseWriter, r *http.Request) error {
 		RemoteIP: r.RemoteAddr,
 		URLPath:  r.URL.Path,
 	}
-	chosenBackendAddr, err := f.lbAlgo.SelectBackend(request)
+	selectedBackend, err := f.lbAlgo.SelectBackend(request)
 	if err != nil {
 		return err
 	}
-	f.logger.Info("backend chose", zap.String("addr", chosenBackendAddr))
-	f.reverseProxy.ServeHTTP(chosenBackendAddr, rw, r)
+	f.logger.Info("backend selected", zap.String("addr", selectedBackend))
+	rp, err := f.rpFactory.Create(selectedBackend)
+	if err != nil {
+		return err
+	}
+	rp.ServeHTTP(rw, r)
 	return nil
 }
