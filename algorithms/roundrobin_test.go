@@ -17,7 +17,7 @@ func TestRoundRobin_SelectServer(t *testing.T) {
 		"server 6",
 	}
 	logger, _ := zap.NewDevelopment()
-	serverPool := algorithms.NewServerPool(servers, logger)
+	serverPool := http_lb.NewServerPool(servers, logger)
 	rr := algorithms.NewRoundRobin(serverPool, logger)
 	for i := 0; i < 100; i++ {
 		expected := servers[i%len(servers)]

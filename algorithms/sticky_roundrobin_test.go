@@ -32,7 +32,7 @@ func TestStickyRoundRobin_SelectServer(t *testing.T) {
 		{http_lb.Request{RemoteIP: "6.6.6.6"}, servers[5]},
 	}
 	logger, _ := zap.NewDevelopment()
-	serverPool := algorithms.NewServerPool(servers, logger)
+	serverPool := http_lb.NewServerPool(servers, logger)
 	sticky_rr := algorithms.NewStickyRoundRobin(serverPool, logger)
 	for i, test := range tests {
 		selectedServer, err := sticky_rr.SelectServer(test.input)

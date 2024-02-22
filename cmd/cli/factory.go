@@ -62,5 +62,5 @@ func ServerPoolFactory(backendsConfig Backend, logger *zap.Logger) http_lb.Serve
 	for _, server := range backendsConfig.Servers {
 		servers = append(servers, server)
 	}
-	return algorithms.NewServerPool(servers, logger)
+	return http_lb.NewServerPool(servers, logger)
 }

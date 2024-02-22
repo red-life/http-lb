@@ -1,8 +1,7 @@
-package algorithms_test
+package http_lb_test
 
 import (
 	"github.com/red-life/http-lb"
-	"github.com/red-life/http-lb/algorithms"
 	"go.uber.org/zap"
 	"testing"
 )
@@ -41,7 +40,7 @@ func TestServerPool_RegisterServer(t *testing.T) {
 		{servers[2], http_lb.ErrServerExists},
 	}
 	logger, _ := zap.NewDevelopment()
-	serverPool := algorithms.NewServerPool([]string{}, logger)
+	serverPool := http_lb.NewServerPool([]string{}, logger)
 	for _, test := range tests {
 		err := serverPool.RegisterServer(test.input)
 		if err != test.expected {
@@ -69,7 +68,7 @@ func TestServerPool_UnregisterServer(t *testing.T) {
 		{servers[2], http_lb.ErrServerNotExist},
 	}
 	logger, _ := zap.NewDevelopment()
-	serverPool := algorithms.NewServerPool(servers, logger)
+	serverPool := http_lb.NewServerPool(servers, logger)
 	for _, test := range tests {
 		err := serverPool.UnregisterServer(test.input)
 		if err != test.expected {

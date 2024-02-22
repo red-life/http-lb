@@ -17,7 +17,7 @@ func TestIPHash_SelectServer(t *testing.T) {
 		"server 6",
 	}
 	logger, _ := zap.NewDevelopment()
-	serverPool := algorithms.NewServerPool(servers, logger)
+	serverPool := http_lb.NewServerPool(servers, logger)
 	ipHash := algorithms.NewIPHash(http_lb.Hash, serverPool, logger)
 	tests := []struct {
 		input    http_lb.Request
