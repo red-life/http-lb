@@ -41,6 +41,15 @@ func ContainsSlice[T comparable](slice []T, target T) bool {
 	return false
 }
 
+func FindSlice[T comparable](slice []T, target T) int {
+	for i, item := range slice {
+		if item == target {
+			return i
+		}
+	}
+	return -1
+}
+
 func HttpGet(url string, timeout time.Duration) (*http.Response, error) {
 	client := &http.Client{
 		Timeout: timeout,

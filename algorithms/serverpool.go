@@ -22,9 +22,11 @@ type ServerPool struct {
 }
 
 func (b *ServerPool) RegisterServer(server string) error {
-	if b.find(server) != -1 {
+	b.rwLock.RLock()
+	if http_lb.ContainsSlice(b.servers, server) {
 		return http_lb.ErrServerExists
 	}
+	b.rwLock.RUnlock()
 	b.rwLock.Lock()
 	defer b.rwLock.Unlock()
 	b.servers = append(b.servers, server)
@@ -33,7 +35,7 @@ func (b *ServerPool) RegisterServer(server string) error {
 }
 
 func (b *ServerPool) UnregisterServer(server string) error {
-	if i := b.find(server); i != -1 {
+	if i := http_lb.FindSlice(b.servers, server); i != -1 {
 		b.rwLock.Lock()
 		defer b.rwLock.Unlock()
 		b.servers = append(b.servers[:i], b.servers[i+1:]...)
@@ -47,15 +49,4 @@ func (b *ServerPool) Servers() []string {
 	b.rwLock.RLock()
 	defer b.rwLock.RUnlock()
 	return http_lb.CopySlice(b.servers)
-}
-
-func (b *ServerPool) find(server string) int {
-	b.rwLock.RLock()
-	defer b.rwLock.RUnlock()
-	for i, s := range b.servers {
-		if s == server {
-			return i
-		}
-	}
-	return -1
 }
