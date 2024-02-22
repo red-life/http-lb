@@ -4,20 +4,21 @@ import (
 	"errors"
 	"fmt"
 	"go.uber.org/zap"
+	"net/http"
 	"time"
 )
 
 var _ HealthChecker = (*HealthCheck)(nil)
 var _ GracefulShutdown = (*HealthCheck)(nil)
 
-func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Duration, serverPool ServerPool,
-	expectedStatusCode int, logger *zap.Logger) *HealthCheck {
+func NewHealthCheck(endPoint string, interval time.Duration, serverPool ServerPool,
+	expectedStatusCode int, client *http.Client, logger *zap.Logger) *HealthCheck {
 	return &HealthCheck{
 		endPoint:           endPoint,
 		interval:           interval,
-		timeout:            timeout,
 		serverPool:         serverPool,
 		expectedStatusCode: expectedStatusCode,
+		client:             client,
 		logger:             logger,
 		shutdownCh:         make(chan struct{}, 1),
 	}
@@ -26,7 +27,7 @@ func NewHealthCheck(endPoint string, interval time.Duration, timeout time.Durati
 type HealthCheck struct {
 	endPoint            string
 	interval            time.Duration
-	timeout             time.Duration
+	client              *http.Client
 	serverPool          ServerPool
 	expectedStatusCode  int
 	unavailableBackends []string
@@ -68,13 +69,13 @@ func (h *HealthCheck) findUnavailableBackends() []string {
 	var unavailableBackends []string
 	addrsToCheck := append(h.serverPool.Servers(), h.unavailableBackends...)
 	for _, addr := range addrsToCheck {
-		resp, err := HttpGet(fmt.Sprintf("%s%s", addr, h.endPoint), h.timeout)
+		resp, err := h.client.Get(fmt.Sprintf("%s%s", addr, h.endPoint))
 		if err == nil && resp.StatusCode == h.expectedStatusCode {
-			h.logger.Info("backend is up", zap.String("addr", addr))
+			h.logger.Info("server is up", zap.String("server", addr))
 			continue
 		}
 		if err != nil {
-			h.logger.Warn("backend went down", zap.String("addr", addr), zap.Error(err))
+			h.logger.Warn("server went down", zap.String("server", addr), zap.Error(err))
 		} else if resp.StatusCode != h.expectedStatusCode {
 			h.logger.Warn("backend went down", zap.Int("statusCode", resp.StatusCode),
 				zap.String("addr", addr))

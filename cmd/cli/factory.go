@@ -4,6 +4,7 @@ import (
 	http_lb "github.com/red-life/http-lb"
 	"github.com/red-life/http-lb/algorithms"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 func Factory(config Config, logger *zap.Logger) (*http_lb.Frontend, *http_lb.HealthCheck) {
@@ -29,7 +30,8 @@ func FrontendFactory(frontend Frontend, reqForwarder http_lb.RequestForwarder, l
 }
 
 func HealthCheckFactory(healthCheck HealthCheck, serverPool http_lb.ServerPool, logger *zap.Logger) *http_lb.HealthCheck {
-	return http_lb.NewHealthCheck(healthCheck.Endpoint, healthCheck.Interval, healthCheck.Timeout, serverPool, healthCheck.ExpectedStatusCode, logger)
+	client := &http.Client{Timeout: healthCheck.Timeout}
+	return http_lb.NewHealthCheck(healthCheck.Endpoint, healthCheck.Interval, serverPool, healthCheck.ExpectedStatusCode, client, logger)
 }
 
 func RequestForwarderFactory(lbAlgo http_lb.LoadBalancingAlgorithm, rpFactory http_lb.ReverseProxyFactory, logger *zap.Logger) http_lb.RequestForwarder {
