@@ -22,6 +22,12 @@ type Forwarder struct {
 }
 
 func (f *Forwarder) Forward(rw http.ResponseWriter, r *http.Request) error {
+	defer func() {
+		if err := recover(); err != nil {
+			f.logger.Error("reverse proxy panic recovered", zap.Any("error", err))
+			rw.WriteHeader(http.StatusBadGateway)
+		}
+	}()
 	request := Request{
 		RemoteIP: r.RemoteAddr,
 		URLPath:  r.URL.Path,
