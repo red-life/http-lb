@@ -26,12 +26,12 @@ func (f *Forwarder) Forward(rw http.ResponseWriter, r *http.Request) error {
 		RemoteIP: r.RemoteAddr,
 		URLPath:  r.URL.Path,
 	}
-	selectedBackend, err := f.lbAlgo.SelectServer(request)
+	selectedServer, err := f.lbAlgo.SelectServer(request)
 	if err != nil {
 		return err
 	}
-	f.logger.Info("backend selected", zap.String("addr", selectedBackend))
-	rp, err := f.rpFactory.Create(selectedBackend)
+	f.logger.Info("server selected", zap.String("server", selectedServer))
+	rp, err := f.rpFactory.Create(selectedServer)
 	if err != nil {
 		return err
 	}

@@ -38,19 +38,19 @@ func RequestForwarderFactory(lbAlgo http_lb.LoadBalancingAlgorithm, rpFactory ht
 	return http_lb.NewForwarder(lbAlgo, rpFactory, logger)
 }
 
-func LoadBalancingAlgorithmFactory(addrMng http_lb.ServerPool,
+func LoadBalancingAlgorithmFactory(serverPool http_lb.ServerPool,
 	hash http_lb.HashingAlgorithm, logger *zap.Logger) func(algorithmName string) http_lb.LoadBalancingAlgorithm {
 	return func(algorithmName string) http_lb.LoadBalancingAlgorithm {
 		if algorithmName == "round-robin" {
-			return algorithms.NewRoundRobin(addrMng, logger)
+			return algorithms.NewRoundRobin(serverPool, logger)
 		} else if algorithmName == "sticky-round-robin" {
-			return algorithms.NewStickyRoundRobin(addrMng, logger)
+			return algorithms.NewStickyRoundRobin(serverPool, logger)
 		} else if algorithmName == "url-hash" {
-			return algorithms.NewURLHash(hash, addrMng, logger)
+			return algorithms.NewURLHash(hash, serverPool, logger)
 		} else if algorithmName == "ip-hash" {
-			return algorithms.NewURLHash(hash, addrMng, logger)
+			return algorithms.NewURLHash(hash, serverPool, logger)
 		} else if algorithmName == "random" {
-			return algorithms.NewRandom(addrMng, logger)
+			return algorithms.NewRandom(serverPool, logger)
 		}
 		logger.Panic("unknown load balancing algorithm", zap.String("algorithmName", algorithmName))
 		return nil
@@ -58,9 +58,9 @@ func LoadBalancingAlgorithmFactory(addrMng http_lb.ServerPool,
 }
 
 func ServerPoolFactory(backendsConfig Backend, logger *zap.Logger) http_lb.ServerPool {
-	var backends []string
-	for _, addr := range backendsConfig.Servers {
-		backends = append(backends, addr)
+	var servers []string
+	for _, server := range backendsConfig.Servers {
+		servers = append(servers, server)
 	}
-	return algorithms.NewServerPool(backends, logger)
+	return algorithms.NewServerPool(servers, logger)
 }

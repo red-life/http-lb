@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestIPHash_ChooseBackend(t *testing.T) {
+func TestIPHash_SelectServer(t *testing.T) {
 	servers := []string{
 		"server 1",
 		"server 2",

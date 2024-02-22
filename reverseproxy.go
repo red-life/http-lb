@@ -31,18 +31,18 @@ type RPFactory struct {
 	transportFactory TransportFactory
 }
 
-func (rp *RPFactory) Create(backendAddr string) (*httputil.ReverseProxy, error) {
-	if proxy, ok := rp.cache[backendAddr]; ok {
+func (rp *RPFactory) Create(server string) (*httputil.ReverseProxy, error) {
+	if proxy, ok := rp.cache[server]; ok {
 		return proxy, nil
 	}
 	proxy := &httputil.ReverseProxy{}
-	parsedUrl, _ := url.Parse(backendAddr)
+	parsedUrl, _ := url.Parse(server)
 	rewriteURL := RewriteURL(parsedUrl)
 	proxy.Rewrite = func(request *httputil.ProxyRequest) {
 		RewriteXForwarded(request)
 		rewriteURL(request)
 	}
 	proxy.Transport = rp.transportFactory.Create()
-	rp.cache[backendAddr] = proxy
+	rp.cache[server] = proxy
 	return proxy, nil
 }

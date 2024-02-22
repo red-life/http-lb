@@ -25,14 +25,14 @@ func NewHealthCheck(endPoint string, interval time.Duration, serverPool ServerPo
 }
 
 type HealthCheck struct {
-	endPoint            string
-	interval            time.Duration
-	client              *http.Client
-	serverPool          ServerPool
-	expectedStatusCode  int
-	unavailableBackends []string
-	logger              *zap.Logger
-	shutdownCh          chan struct{}
+	endPoint           string
+	interval           time.Duration
+	client             *http.Client
+	serverPool         ServerPool
+	expectedStatusCode int
+	unavailableServers []string
+	logger             *zap.Logger
+	shutdownCh         chan struct{}
 }
 
 func (h *HealthCheck) Run() {
@@ -55,41 +55,41 @@ func (h *HealthCheck) Shutdown() error {
 }
 
 func (h *HealthCheck) run() {
-	foundUnavailableBackends := h.findUnavailableBackends()
-	unavailableBackends := DifferenceSlices(foundUnavailableBackends, h.unavailableBackends)
-	_ = h.unregister(unavailableBackends)
-	if len(h.unavailableBackends) > 0 {
-		availableBackends := DifferenceSlices(h.unavailableBackends, foundUnavailableBackends)
-		_ = h.register(availableBackends)
+	foundUnavailableServers := h.findUnavailableServers()
+	unavailableServers := DifferenceSlices(foundUnavailableServers, h.unavailableServers)
+	_ = h.unregister(unavailableServers)
+	if len(h.unavailableServers) > 0 {
+		availableServers := DifferenceSlices(h.unavailableServers, foundUnavailableServers)
+		_ = h.register(availableServers)
 	}
-	h.unavailableBackends = foundUnavailableBackends
+	h.unavailableServers = foundUnavailableServers
 }
 
-func (h *HealthCheck) findUnavailableBackends() []string {
-	var unavailableBackends []string
-	addrsToCheck := append(h.serverPool.Servers(), h.unavailableBackends...)
-	for _, addr := range addrsToCheck {
-		resp, err := h.client.Get(fmt.Sprintf("%s%s", addr, h.endPoint))
+func (h *HealthCheck) findUnavailableServers() []string {
+	var unavailableServers []string
+	serversToCheck := append(h.serverPool.Servers(), h.unavailableServers...)
+	for _, server := range serversToCheck {
+		resp, err := h.client.Get(fmt.Sprintf("%s%s", server, h.endPoint))
 		if err == nil && resp.StatusCode == h.expectedStatusCode {
-			h.logger.Info("server is up", zap.String("server", addr))
+			h.logger.Info("server is up", zap.String("server", server))
 			continue
 		}
 		if err != nil {
-			h.logger.Warn("server went down", zap.String("server", addr), zap.Error(err))
+			h.logger.Warn("server went down", zap.String("server", server), zap.Error(err))
 		} else if resp.StatusCode != h.expectedStatusCode {
-			h.logger.Warn("backend went down", zap.Int("statusCode", resp.StatusCode),
-				zap.String("addr", addr))
+			h.logger.Warn("server went down", zap.Int("statusCode", resp.StatusCode),
+				zap.String("server", server))
 		}
-		unavailableBackends = append(unavailableBackends, addr)
+		unavailableServers = append(unavailableServers, server)
 		continue
 
 	}
-	return unavailableBackends
+	return unavailableServers
 }
 
-func (h *HealthCheck) unregister(addrs []string) error {
-	for _, addr := range addrs {
-		err := h.serverPool.UnregisterServer(addr)
+func (h *HealthCheck) unregister(servers []string) error {
+	for _, server := range servers {
+		err := h.serverPool.UnregisterServer(server)
 		if !errors.Is(err, ErrServerNotExist) {
 			return err
 		}
@@ -97,9 +97,9 @@ func (h *HealthCheck) unregister(addrs []string) error {
 	return nil
 }
 
-func (h *HealthCheck) register(addrs []string) error {
-	for _, addr := range addrs {
-		err := h.serverPool.RegisterServer(addr)
+func (h *HealthCheck) register(servers []string) error {
+	for _, server := range servers {
+		err := h.serverPool.RegisterServer(server)
 		if !errors.Is(err, ErrServerExists) {
 			return err
 		}
