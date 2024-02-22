@@ -21,7 +21,7 @@ type URLHash struct {
 	logger      *zap.Logger
 }
 
-func (u *URLHash) ChooseBackend(r http_lb.Request) (string, error) {
+func (u *URLHash) SelectBackend(r http_lb.Request) (string, error) {
 	addrs := u.backendPool.Backends()
 	if len(addrs) <= 0 {
 		u.logger.Error("no backend available")

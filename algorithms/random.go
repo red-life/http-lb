@@ -21,7 +21,7 @@ type Random struct {
 	logger      *zap.Logger
 }
 
-func (r *Random) ChooseBackend(_ http_lb.Request) (string, error) {
+func (r *Random) SelectBackend(_ http_lb.Request) (string, error) {
 	addrs := r.backendPool.Backends()
 	if len(addrs) <= 0 {
 		r.logger.Error("no backend available")

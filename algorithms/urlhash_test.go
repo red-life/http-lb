@@ -29,7 +29,7 @@ func TestURLHash_ChooseBackend(t *testing.T) {
 		{http_lb.Request{URLPath: "/api/v1"}, backendAddrs[int(http_lb.Hash("/api/v1"))%len(backendAddrs)]},
 	}
 	for i, test := range tests {
-		chosenBackend, err := urlHash.ChooseBackend(test.input)
+		chosenBackend, err := urlHash.SelectBackend(test.input)
 		if err != nil {
 			t.Fatalf("Expected err to be nil but got %s\n", err)
 		}

@@ -22,7 +22,7 @@ type RoundRobin struct {
 	logger      *zap.Logger
 }
 
-func (r *RoundRobin) ChooseBackend(_ http_lb.Request) (string, error) {
+func (r *RoundRobin) SelectBackend(_ http_lb.Request) (string, error) {
 	addrs := r.backendPool.Backends()
 	if len(addrs) <= 0 {
 		r.logger.Error("no backend available")

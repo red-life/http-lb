@@ -29,7 +29,7 @@ func TestIPHash_ChooseBackend(t *testing.T) {
 		{http_lb.Request{RemoteIP: "4.4.4.4"}, backendAddrs[int(http_lb.Hash("4.4.4.4"))%len(backendAddrs)]},
 	}
 	for i, test := range tests {
-		chosenBackend, err := ipHash.ChooseBackend(test.input)
+		chosenBackend, err := ipHash.SelectBackend(test.input)
 		if err != nil {
 			t.Fatalf("Expected err to be nil but got %s\n", err)
 		}

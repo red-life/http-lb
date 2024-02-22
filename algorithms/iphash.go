@@ -21,7 +21,7 @@ type IPHash struct {
 	logger      *zap.Logger
 }
 
-func (i *IPHash) ChooseBackend(r http_lb.Request) (string, error) {
+func (i *IPHash) SelectBackend(r http_lb.Request) (string, error) {
 	addrs := i.backendPool.Backends()
 	if len(addrs) <= 0 {
 		i.logger.Error("no backend available")

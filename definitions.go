@@ -14,7 +14,7 @@ type BackendPool interface {
 }
 
 type LoadBalancingAlgorithm interface {
-	ChooseBackend(Request) (string, error)
+	SelectBackend(Request) (string, error)
 }
 
 type ReverseProxy interface {

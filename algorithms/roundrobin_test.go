@@ -21,7 +21,7 @@ func TestRoundRobin_ChooseBackend(t *testing.T) {
 	rr := algorithms.NewRoundRobin(backendPool, logger)
 	for i := 0; i < 100; i++ {
 		expected := backendAddrs[i%len(backendAddrs)]
-		chosenBackend, err := rr.ChooseBackend(http_lb.Request{})
+		chosenBackend, err := rr.SelectBackend(http_lb.Request{})
 		if err != nil {
 			t.Fatalf("Expected err to be nil but got %s\n", err)
 		}

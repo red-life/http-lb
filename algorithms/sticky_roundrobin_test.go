@@ -35,7 +35,7 @@ func TestStickyRoundRobin_ChooseBackend(t *testing.T) {
 	backendPool := algorithms.NewBackendPool(backendAddrs, logger)
 	sticky_rr := algorithms.NewStickyRoundRobin(backendPool, logger)
 	for i, test := range tests {
-		chosenBackend, err := sticky_rr.ChooseBackend(test.input)
+		chosenBackend, err := sticky_rr.SelectBackend(test.input)
 		if err != nil {
 			t.Fatalf("Expected err to be nil but got %s\n", err)
 		}

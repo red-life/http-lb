@@ -29,7 +29,7 @@ type StickyRoundRobin struct {
 	logger      *zap.Logger
 }
 
-func (s *StickyRoundRobin) ChooseBackend(r http_lb.Request) (string, error) {
+func (s *StickyRoundRobin) SelectBackend(r http_lb.Request) (string, error) {
 	addrs := s.backendPool.Backends()
 	if len(addrs) <= 0 {
 		s.logger.Error("no backend available")

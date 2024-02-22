@@ -26,7 +26,7 @@ func (f *Forwarder) Forward(rw http.ResponseWriter, r *http.Request) error {
 		RemoteIP: r.RemoteAddr,
 		URLPath:  r.URL.Path,
 	}
-	chosenBackendAddr, err := f.lbAlgo.ChooseBackend(request)
+	chosenBackendAddr, err := f.lbAlgo.SelectBackend(request)
 	if err != nil {
 		return err
 	}
