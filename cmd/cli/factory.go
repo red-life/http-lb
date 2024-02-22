@@ -9,7 +9,8 @@ import (
 func Factory(config Config, logger *zap.Logger) (*http_lb.Frontend, *http_lb.HealthCheck) {
 	serverPool := ServerPoolFactory(config.Backend, logger)
 	lbAlgo := LoadBalancingAlgorithmFactory(serverPool, http_lb.Hash, logger)(config.Algorithm)
-	reverseProxy := RevereProxyFactory(config.Backend)
+	transport := http_lb.NewTransportFactory(config.Backend.Timeout, config.Backend.KeepAlive.MaxIdle, config.Backend.KeepAlive.IdleTimeout)
+	reverseProxy := http_lb.NewRPFactory(transport)
 	forwarder := RequestForwarderFactory(lbAlgo, reverseProxy, logger)
 	frontend := FrontendFactory(config.Frontend, forwarder, logger)
 	healthCheck := HealthCheckFactory(config.HealthCheck, serverPool, logger)
@@ -31,32 +32,8 @@ func HealthCheckFactory(healthCheck HealthCheck, serverPool http_lb.BackendPool,
 	return http_lb.NewHealthCheck(healthCheck.Endpoint, healthCheck.Interval, healthCheck.Timeout, serverPool, healthCheck.ExpectedStatusCode, logger)
 }
 
-func RequestForwarderFactory(lbAlgo http_lb.LoadBalancingAlgorithm,
-	reverseProxy http_lb.ReverseProxy, logger *zap.Logger) http_lb.RequestForwarder {
-	return http_lb.NewForwarder(lbAlgo, reverseProxy, logger)
-}
-
-func RevereProxyFactory(configBackends []Backend) http_lb.ReverseProxy {
-	var backends []http_lb.Backend
-	for _, b := range configBackends {
-		var keepAlive *http_lb.KeepAlive
-		if b.KeepAlive != nil {
-			keepAlive = &http_lb.KeepAlive{
-				MaxIdleConns:     b.KeepAlive.MaxIdle,
-				IdleConnsTimeout: b.KeepAlive.IdleTimeout,
-			}
-		}
-		transport := http_lb.CreateTransport(http_lb.TransportOptions{
-			Timeout:   b.Timeout,
-			KeepAlive: keepAlive,
-		})
-		backend := http_lb.Backend{
-			Addr:      b.Address,
-			Transport: transport,
-		}
-		backends = append(backends, backend)
-	}
-	return http_lb.NewReverseProxy(backends)
+func RequestForwarderFactory(lbAlgo http_lb.LoadBalancingAlgorithm, rpFactory http_lb.ReverseProxyFactory, logger *zap.Logger) http_lb.RequestForwarder {
+	return http_lb.NewForwarder(lbAlgo, rpFactory, logger)
 }
 
 func LoadBalancingAlgorithmFactory(addrMng http_lb.BackendPool,
@@ -78,10 +55,10 @@ func LoadBalancingAlgorithmFactory(addrMng http_lb.BackendPool,
 	}
 }
 
-func ServerPoolFactory(backendsConfig []Backend, logger *zap.Logger) http_lb.BackendPool {
+func ServerPoolFactory(backendsConfig Backend, logger *zap.Logger) http_lb.BackendPool {
 	var backends []string
-	for _, b := range backendsConfig {
-		backends = append(backends, b.Address)
+	for _, addr := range backendsConfig.Addresses {
+		backends = append(backends, addr)
 	}
 	return algorithms.NewBackendPool(backends, logger)
 }

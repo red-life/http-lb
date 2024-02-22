@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"time"
@@ -11,7 +10,7 @@ type Config struct {
 	Algorithm   string      `mapstructure:"algorithm" validate:"oneof=round-robin sticky-round-robin weighted-round-robin url-hash ip-hash random"`
 	LogLevel    string      `mapstructure:"log_level" validate:"oneof=debug info warn error"`
 	Frontend    Frontend    `mapstructure:"frontend" validate:"required"`
-	Backend     []Backend   `mapstructure:"backend" validate:"required"`
+	Backend     Backend     `mapstructure:"backend" validate:"required"`
 	HealthCheck HealthCheck `mapstructure:"health_check" validate:"required"`
 }
 
@@ -26,9 +25,9 @@ type TLS struct {
 }
 
 type Backend struct {
-	Address   string        `mapstructure:"address" validate:"url,required"`
+	Addresses []string      `mapstructure:"address" validate:"url,required"`
 	Timeout   time.Duration `mapstructure:"timeout" validate:"min=1ms,required"`
-	KeepAlive *KeepAlive    `mapstructure:"keep_alive"`
+	KeepAlive KeepAlive     `mapstructure:"keep_alive"`
 }
 
 type KeepAlive struct {
