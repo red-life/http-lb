@@ -9,6 +9,13 @@ type HashingAlgorithm func(string) uint
 
 type ServerStatus int
 
+func (s ServerStatus) String() string {
+	if s == Healthy {
+		return "up"
+	}
+	return "down"
+}
+
 const (
 	Healthy ServerStatus = iota + 1
 	Unhealthy
