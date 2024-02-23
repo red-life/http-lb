@@ -2,8 +2,6 @@ package http_lb
 
 import (
 	"hash/fnv"
-	"net/http"
-	"time"
 )
 
 func Hash(input string) uint {
@@ -48,11 +46,4 @@ func FindSlice[T comparable](slice []T, target T) int {
 		}
 	}
 	return -1
-}
-
-func HttpGet(url string, timeout time.Duration) (*http.Response, error) {
-	client := &http.Client{
-		Timeout: timeout,
-	}
-	return client.Get(url)
 }
