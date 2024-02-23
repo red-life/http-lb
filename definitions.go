@@ -14,11 +14,16 @@ const (
 	Unhealthy
 )
 
+type Server struct {
+	Address string
+	Status  ServerStatus
+}
+
 type ServerPool interface {
 	RegisterServer(string) error
 	UnregisterServer(string) error
 	SetServerStatus(string, ServerStatus) error
-	Servers() []string
+	Servers() []Server
 	HealthyServers() []string
 	UnhealthyServers() []string
 }
