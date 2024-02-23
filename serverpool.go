@@ -37,23 +37,21 @@ func (b *ServerPoolImplementation) Servers() []string {
 }
 
 func (b *ServerPoolImplementation) HealthyServers() []string {
-	healthyServers := make([]string, len(b.servers))
-	for server, status := range b.servers {
-		if status == Healthy {
-			healthyServers = append(healthyServers, server)
-		}
-	}
-	return healthyServers
+	return b.getByStatus(Healthy)
 }
 
 func (b *ServerPoolImplementation) UnhealthyServers() []string {
-	healthyServers := make([]string, len(b.servers))
-	for server, status := range b.servers {
-		if status == Unhealthy {
-			healthyServers = append(healthyServers, server)
+	return b.getByStatus(Unhealthy)
+}
+
+func (b *ServerPoolImplementation) getByStatus(status ServerStatus) []string {
+	servers := make([]string, 0)
+	for server, serverStatus := range b.servers {
+		if serverStatus == status {
+			servers = append(servers, server)
 		}
 	}
-	return healthyServers
+	return servers
 }
 
 func (b *ServerPoolImplementation) RegisterServer(server string) error {
