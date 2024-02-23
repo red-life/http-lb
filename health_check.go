@@ -1,7 +1,6 @@
 package http_lb
 
 import (
-	"errors"
 	"fmt"
 	"go.uber.org/zap"
 	"net/http"
@@ -30,7 +29,6 @@ type HealthCheck struct {
 	client             *http.Client
 	serverPool         ServerPool
 	expectedStatusCode int
-	unavailableServers []string
 	logger             *zap.Logger
 	shutdownCh         chan struct{}
 }
@@ -43,7 +41,9 @@ func (h *HealthCheck) Run() {
 			case <-h.shutdownCh:
 				return
 			default:
-				h.run()
+				for _, server := range h.serverPool.Servers() {
+					go h.check(server)
+				}
 			}
 		}
 	}()
@@ -54,55 +54,19 @@ func (h *HealthCheck) Shutdown() error {
 	return nil
 }
 
-func (h *HealthCheck) run() {
-	foundUnavailableServers := h.findUnavailableServers()
-	unavailableServers := DifferenceSlices(foundUnavailableServers, h.unavailableServers)
-	_ = h.unregister(unavailableServers)
-	if len(h.unavailableServers) > 0 {
-		availableServers := DifferenceSlices(h.unavailableServers, foundUnavailableServers)
-		_ = h.register(availableServers)
+func (h *HealthCheck) check(server Server) {
+	status := Unhealthy
+	resp, err := h.client.Get(fmt.Sprintf("%s%s", server.Address, h.endPoint))
+	if err == nil && resp.StatusCode == h.expectedStatusCode {
+		status = Healthy
 	}
-	h.unavailableServers = foundUnavailableServers
-}
-
-func (h *HealthCheck) findUnavailableServers() []string {
-	var unavailableServers []string
-	serversToCheck := append(h.serverPool.Servers(), h.unavailableServers...)
-	for _, server := range serversToCheck {
-		resp, err := h.client.Get(fmt.Sprintf("%s%s", server, h.endPoint))
-		if err == nil && resp.StatusCode == h.expectedStatusCode {
-			h.logger.Info("server is up", zap.String("server", server))
-			continue
-		}
-		if err != nil {
-			h.logger.Warn("server went down", zap.String("server", server), zap.Error(err))
-		} else if resp.StatusCode != h.expectedStatusCode {
-			h.logger.Warn("server went down", zap.Int("statusCode", resp.StatusCode),
-				zap.String("server", server))
-		}
-		unavailableServers = append(unavailableServers, server)
-		continue
-
+	err = h.serverPool.SetServerStatus(server.Address, status)
+	if err != nil {
+		h.logger.Error("unexpected error for setting the server status", zap.Error(err), zap.String("server", server.Address))
 	}
-	return unavailableServers
-}
-
-func (h *HealthCheck) unregister(servers []string) error {
-	for _, server := range servers {
-		err := h.serverPool.UnregisterServer(server)
-		if !errors.Is(err, ErrServerNotExist) {
-			return err
-		}
+	if server.Status != status {
+		h.logger.Warn(fmt.Sprintf("server went %s", status), zap.String("server", server.Address))
+		return
 	}
-	return nil
-}
-
-func (h *HealthCheck) register(servers []string) error {
-	for _, server := range servers {
-		err := h.serverPool.RegisterServer(server)
-		if !errors.Is(err, ErrServerExists) {
-			return err
-		}
-	}
-	return nil
+	h.logger.Warn(fmt.Sprintf("server is still %s", status), zap.String("server", server.Address))
 }
