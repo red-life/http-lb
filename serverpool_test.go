@@ -47,7 +47,11 @@ func TestServerPool_RegisterServer(t *testing.T) {
 			t.Fatalf("Expected err to be %s but got %s", test.expected, err)
 		}
 	}
-	if !isEqual(servers, serverPool.Servers()) {
+	serverAddrs := make([]string, 0)
+	for _, server := range serverPool.Servers() {
+		serverAddrs = append(serverAddrs, server.Address)
+	}
+	if !isEqual(servers, serverAddrs) {
 		t.Fatalf("Expected all servers to be registered but got %+v", serverPool.Servers())
 	}
 }
