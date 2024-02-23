@@ -27,7 +27,7 @@ type ServerPoolImplementation struct {
 
 func (b *ServerPoolImplementation) SetServerStatus(server string, status ServerStatus) error {
 	if !b.checkExistence(server) {
-		return ErrServerNotExist
+		return ErrServerNotExists
 	}
 	b.rwLock.Lock()
 	defer b.rwLock.Unlock()
@@ -74,7 +74,7 @@ func (b *ServerPoolImplementation) RegisterServer(server string) error {
 
 func (b *ServerPoolImplementation) UnregisterServer(server string) error {
 	if !b.checkExistence(server) {
-		return ErrServerNotExist
+		return ErrServerNotExists
 	}
 	b.rwLock.Lock()
 	defer b.rwLock.Unlock()

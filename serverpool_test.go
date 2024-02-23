@@ -67,9 +67,9 @@ func TestServerPool_UnregisterServer(t *testing.T) {
 		{servers[2], nil},
 		{servers[3], nil},
 		{servers[4], nil},
-		{servers[0], http_lb.ErrServerNotExist},
-		{servers[1], http_lb.ErrServerNotExist},
-		{servers[2], http_lb.ErrServerNotExist},
+		{servers[0], http_lb.ErrServerNotExists},
+		{servers[1], http_lb.ErrServerNotExists},
+		{servers[2], http_lb.ErrServerNotExists},
 	}
 	logger, _ := zap.NewDevelopment()
 	serverPool := http_lb.NewServerPool(servers, logger)
