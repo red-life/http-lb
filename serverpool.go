@@ -8,44 +8,73 @@ import (
 var _ ServerPool = (*ServerPoolImplementation)(nil)
 
 func NewServerPool(servers []string, logger *zap.Logger) *ServerPoolImplementation {
+	s := make(map[string]ServerStatus)
+	for _, server := range servers {
+		s[server] = Healthy
+	}
 	return &ServerPoolImplementation{
-		servers: CopySlice(servers),
+		servers: s,
 		logger:  logger,
 	}
 }
 
 type ServerPoolImplementation struct {
-	servers []string
+	servers map[string]ServerStatus
 	rwLock  sync.RWMutex
 	logger  *zap.Logger
 }
 
+func (b *ServerPoolImplementation) SetServerStatus(server string, status ServerStatus) error {
+	if _, ok := b.servers[server]; !ok {
+		return ErrServerNotExist
+	}
+	b.servers[server] = status
+	return nil
+}
+
+func (b *ServerPoolImplementation) Servers() []string {
+	return KeysMap(b.servers)
+}
+
+func (b *ServerPoolImplementation) HealthyServers() []string {
+	healthyServers := make([]string, len(b.servers))
+	for server, status := range b.servers {
+		if status == Healthy {
+			healthyServers = append(healthyServers, server)
+		}
+	}
+	return healthyServers
+}
+
+func (b *ServerPoolImplementation) UnhealthyServers() []string {
+	healthyServers := make([]string, len(b.servers))
+	for server, status := range b.servers {
+		if status == Unhealthy {
+			healthyServers = append(healthyServers, server)
+		}
+	}
+	return healthyServers
+}
+
 func (b *ServerPoolImplementation) RegisterServer(server string) error {
 	b.rwLock.RLock()
-	if ContainsSlice(b.servers, server) {
+	if _, ok := b.servers[server]; ok {
 		return ErrServerExists
 	}
 	b.rwLock.RUnlock()
 	b.rwLock.Lock()
 	defer b.rwLock.Unlock()
-	b.servers = append(b.servers, server)
+	b.servers[server] = Healthy
 	b.logger.Debug("server registered", zap.String("server", server))
 	return nil
 }
 
 func (b *ServerPoolImplementation) UnregisterServer(server string) error {
-	if i := FindSlice(b.servers, server); i != -1 {
-		b.rwLock.Lock()
-		defer b.rwLock.Unlock()
-		b.servers = append(b.servers[:i], b.servers[i+1:]...)
-		b.logger.Debug("server unregistered", zap.String("server", server))
-		return nil
+	b.rwLock.Lock()
+	defer b.rwLock.Unlock()
+	if _, ok := b.servers[server]; !ok {
+		return ErrServerNotExist
 	}
-	return ErrServerNotExist
-}
-
-func (b *ServerPoolImplementation) Servers() []string {
-	b.rwLock.RLock()
-	defer b.rwLock.RUnlock()
-	return CopySlice(b.servers)
+	delete(b.servers, server)
+	return nil
 }
