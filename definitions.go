@@ -7,10 +7,20 @@ import (
 
 type HashingAlgorithm func(string) uint
 
+type ServerStatus int
+
+const (
+	Healthy ServerStatus = iota + 1
+	Unhealthy
+)
+
 type ServerPool interface {
 	RegisterServer(string) error
 	UnregisterServer(string) error
+	SetServerStatus(string, ServerStatus) error
 	Servers() []string
+	HealthyServers() []string
+	UnhealthyServers() []string
 }
 
 type LoadBalancingAlgorithm interface {
