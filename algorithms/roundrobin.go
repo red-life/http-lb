@@ -23,10 +23,10 @@ type RoundRobin struct {
 }
 
 func (r *RoundRobin) SelectServer(_ http_lb.Request) (string, error) {
-	servers := r.serverPool.Servers()
+	servers := r.serverPool.HealthyServers()
 	if len(servers) <= 0 {
 		r.logger.Error("no server is available")
-		return "", http_lb.ErrNoServerAvailable
+		return "", http_lb.ErrNoHealthyServerAvailable
 	}
 	r.lock.Lock()
 	defer r.lock.Unlock()

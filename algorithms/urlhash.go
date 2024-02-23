@@ -22,10 +22,10 @@ type URLHash struct {
 }
 
 func (u *URLHash) SelectServer(r http_lb.Request) (string, error) {
-	servers := u.serverPool.Servers()
+	servers := u.serverPool.HealthyServers()
 	if len(servers) <= 0 {
 		u.logger.Error("no server available")
-		return "", http_lb.ErrNoServerAvailable
+		return "", http_lb.ErrNoHealthyServerAvailable
 	}
 	idx := int(u.hash(r.URLPath)) % len(servers)
 	return servers[idx], nil

@@ -30,10 +30,10 @@ type StickyRoundRobin struct {
 }
 
 func (s *StickyRoundRobin) SelectServer(r http_lb.Request) (string, error) {
-	servers := s.serverPool.Servers()
+	servers := s.serverPool.HealthyServers()
 	if len(servers) <= 0 {
 		s.logger.Error("no server is available")
-		return "", http_lb.ErrNoServerAvailable
+		return "", http_lb.ErrNoHealthyServerAvailable
 	}
 	s.lock.Lock()
 	defer s.lock.Unlock()

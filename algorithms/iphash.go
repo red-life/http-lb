@@ -22,10 +22,10 @@ type IPHash struct {
 }
 
 func (i *IPHash) SelectServer(r http_lb.Request) (string, error) {
-	servers := i.serverPool.Servers()
+	servers := i.serverPool.HealthyServers()
 	if len(servers) <= 0 {
 		i.logger.Error("no server is available")
-		return "", http_lb.ErrNoServerAvailable
+		return "", http_lb.ErrNoHealthyServerAvailable
 	}
 	idx := int(i.hash(r.RemoteIP)) % len(servers)
 	return servers[idx], nil
