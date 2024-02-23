@@ -64,7 +64,7 @@ health_check:
 - `backend`: The most important field. You define your backends in an array.
     - `servers`: An array of URLs of the backend servers.
     - `timeout`: Timeout for requests to the backend.
-    - `keep_alive`: If you don't want the reverse proxy creates connection for each request keep the keep_alive field.
+    - `keep_alive`: Keeping the connections alive to avoid create connection for each request.
         - `max_idle_connections`: Maximum number of idle connections (0 for no limit).
         - `idle_connection_timeout`: The maximum amount of time an idle connection will remain idle before closing itself. (0 means no limit)
 - `health_check`: Monitors backend health and adjusts routing accordingly.
