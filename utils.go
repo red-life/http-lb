@@ -47,3 +47,11 @@ func FindSlice[T comparable](slice []T, target T) int {
 	}
 	return -1
 }
+
+func KeysMap[K comparable, V any](m map[K]V) []K {
+	keys := make([]K, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
