@@ -31,8 +31,8 @@ type Backend struct {
 }
 
 type KeepAlive struct {
-	MaxIdle     int           `mapstructure:"max_idle_connections" validate:"min=1,required"`
-	IdleTimeout time.Duration `mapstructure:"idle_connection_timeout" validate:"min=1ms,required"`
+	MaxIdle     int           `mapstructure:"max_idle_connections" validate:"min=0,required"`
+	IdleTimeout time.Duration `mapstructure:"idle_connection_timeout" validate:"min=0s,required"`
 }
 
 type HealthCheck struct {
